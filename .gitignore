@@ -5,3 +5,6 @@ __pycache__/
 !.env.example
 .DS_Store
 .serena/
+.venv/
+.uv-cache/
+demo-jobs/

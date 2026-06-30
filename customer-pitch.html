@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSO Report Reviewer - Customer Pitch</title>
+<style>
+  :root {
+    --ink: #17202c;
+    --muted: #5f6f83;
+    --bg: #f5f7fb;
+    --paper: #ffffff;
+    --line: #d8e0ea;
+    --line-strong: #b8c5d5;
+    --blue: #2458d3;
+    --teal: #087f8c;
+    --green: #177245;
+    --amber: #a65f00;
+    --red: #b42318;
+    --plum: #6741a3;
+    --navy: #111827;
+    --shadow: 0 18px 45px rgba(17, 24, 39, 0.11);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+  a { color: inherit; }
+  .page { min-height: 100vh; }
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(12px);
+  }
+  .nav-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 0 24px;
+  }
+  .brand { font-weight: 850; color: var(--navy); letter-spacing: 0; }
+  .links { display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.86rem; color: var(--muted); }
+  .links a { text-decoration: none; }
+  .links a:hover { color: var(--blue); }
+
+  .hero {
+    min-height: calc(100vh - 64px);
+    display: grid;
+    align-items: center;
+    padding: 42px 24px 30px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.95), rgba(245,247,251,0.94)),
+      linear-gradient(90deg, rgba(36,88,211,0.10), rgba(8,127,140,0.08));
+  }
+  .hero-inner {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(420px, 1.05fr);
+    gap: 38px;
+    align-items: center;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #eaf1ff;
+    color: var(--blue);
+    border: 1px solid #c9d9ff;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+  h1 {
+    font-size: clamp(2.45rem, 6vw, 5rem);
+    line-height: 0.97;
+    margin: 18px 0 18px;
+    letter-spacing: 0;
+  }
+  .lead { color: var(--muted); font-size: 1.12rem; max-width: 660px; margin: 0 0 24px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+  .button {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    padding: 10px 15px;
+    text-decoration: none;
+    font-weight: 800;
+    border: 1px solid var(--line-strong);
+    background: #fff;
+    color: var(--ink);
+  }
+  .button.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .proof-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    max-width: 720px;
+  }
+  .proof {
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.78);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .proof strong { display: block; font-size: 1.28rem; }
+  .proof span { color: var(--muted); font-size: 0.82rem; }
+
+  .product-shot {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .shot-bar {
+    min-height: 42px;
+    border-bottom: 1px solid var(--line);
+    background: #111827;
+    color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 14px;
+    font-size: 0.82rem;
+    font-weight: 750;
+  }
+  .shot-content { padding: 16px; display: grid; gap: 14px; }
+  .shot-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .shot-metric {
+    background: #f8fafc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    min-height: 78px;
+  }
+  .shot-metric span { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; font-weight: 800; }
+  .shot-metric strong { display: block; margin-top: 6px; font-size: 1.5rem; line-height: 1; }
+  .shot-table { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .shot-row {
+    display: grid;
+    grid-template-columns: 1fr 80px 92px 110px;
+    gap: 10px;
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+    font-size: 0.82rem;
+  }
+  .shot-row:last-child { border-bottom: 0; }
+  .shot-head { background: #f1f5f9; color: var(--muted); text-transform: uppercase; font-size: 0.7rem; font-weight: 850; }
+  .pill {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    font-weight: 850;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .pill.critical { color: var(--red); background: #fff1f0; border-color: #ffd6d1; }
+  .pill.high { color: var(--amber); background: #fff8e6; border-color: #ffe3a3; }
+  .pill.review { color: var(--plum); background: #f4efff; border-color: #dfd2ff; }
+  .pill.ok { color: var(--green); background: #effaf3; border-color: #c7efd5; }
+  .pill.info { color: var(--teal); background: #e9fbfd; border-color: #bfeff4; }
+
+  section {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 64px 24px;
+  }
+  .section-head { margin-bottom: 24px; max-width: 780px; }
+  .section-kicker { color: var(--blue); font-size: 0.78rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.06em; }
+  h2 { font-size: clamp(1.7rem, 3vw, 2.55rem); line-height: 1.08; margin: 8px 0 10px; letter-spacing: 0; }
+  .section-head p { color: var(--muted); margin: 0; font-size: 1rem; }
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px;
+    box-shadow: 0 8px 24px rgba(17,24,39,0.05);
+  }
+  .card h3 { margin: 0 0 8px; font-size: 1.02rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+  .card strong { color: var(--ink); }
+
+  .band {
+    background: #ffffff;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .workflow {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .step {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 150px;
+    position: relative;
+  }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 850;
+    margin-bottom: 12px;
+  }
+  .step h3 { margin: 0 0 8px; font-size: 0.98rem; }
+  .step p { margin: 0; color: var(--muted); font-size: 0.86rem; }
+
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(380px, 1.1fr);
+    gap: 22px;
+    align-items: start;
+  }
+  .list { display: grid; gap: 10px; }
+  .list-item {
+    display: grid;
+    grid-template-columns: 118px minmax(0, 1fr);
+    gap: 12px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .list-item b { color: var(--blue); }
+  .list-item span { color: var(--muted); font-size: 0.92rem; }
+  .matrix {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .matrix-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--line);
+  }
+  .matrix-row:last-child { border-bottom: 0; }
+  .matrix-cell { padding: 13px; font-size: 0.88rem; }
+  .matrix-head { background: #f1f5f9; color: var(--muted); font-size: 0.73rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .diagram-wrap {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-top: 22px;
+  }
+  .diagram-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 16px;
+    background: #111827;
+    color: #f9fafb;
+    font-size: 0.86rem;
+    font-weight: 850;
+  }
+  .diagram-title span:last-child { color: #a7f3d0; font-size: 0.78rem; }
+  .diagram-wrap svg { display: block; width: 100%; height: auto; min-height: 420px; }
+
+  .before-after {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 74px minmax(0, 1fr);
+    gap: 18px;
+    align-items: stretch;
+  }
+  .picture-panel {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(17,24,39,0.05);
+    overflow: hidden;
+  }
+  .picture-head {
+    min-height: 46px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--line);
+    font-weight: 850;
+  }
+  .picture-body { padding: 14px; display: grid; gap: 10px; }
+  .mock-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .mock-meta div {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .mock-meta b { display: block; color: var(--blue); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .mock-meta span { color: var(--muted); font-size: 0.9rem; }
+  .mock-table { display: grid; gap: 8px; }
+  .mock-row {
+    display: grid;
+    grid-template-columns: minmax(130px, 1.05fr) 86px minmax(150px, 1fr);
+    gap: 10px;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    background: #fff;
+    min-height: 72px;
+  }
+  .mock-row.action {
+    grid-template-columns: minmax(104px, 0.85fr) 76px 82px minmax(0, 1.35fr);
+    gap: 8px;
+    border-color: #bfdbfe;
+    background: #eff6ff;
+  }
+  .mock-head {
+    min-height: 0;
+    background: #f8fafc;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 850;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .mock-cell, .mock-code { min-width: 0; }
+  .mock-cell strong { display: block; font-size: 0.94rem; line-height: 1.2; }
+  .mock-cell span { color: var(--muted); display: block; font-size: 0.78rem; margin-top: 3px; }
+  .mock-code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    color: #334155;
+    font-size: 0.76rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+  .mock-foot {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding-top: 4px;
+  }
+  .mock-foot span {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f8fafc;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 750;
+    padding: 8px 10px;
+  }
+  .raw-row, .action-row {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px;
+    background: #fff;
+  }
+  .raw-row { color: var(--muted); }
+  .action-row { border-color: #bfdbfe; background: #eff6ff; }
+  .row-title { display: flex; justify-content: space-between; gap: 10px; align-items: center; font-weight: 850; color: var(--ink); margin-bottom: 5px; }
+  .row-text { font-size: 0.86rem; color: var(--muted); }
+  .arrow-column {
+    display: grid;
+    place-items: center;
+    color: #fff;
+  }
+  .arrow-badge {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--blue);
+    display: grid;
+    place-items: center;
+    font-size: 1.75rem;
+    font-weight: 850;
+    box-shadow: var(--shadow);
+  }
+
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+    gap: 18px;
+    align-items: start;
+  }
+  .scenario-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px;
+    box-shadow: 0 8px 24px rgba(17,24,39,0.05);
+  }
+  .scenario-card h3 { margin: 0 0 12px; font-size: 1.02rem; }
+  .scenario-list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .scenario-list li {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 12px;
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+  .scenario-list li:first-child { border-top: 0; padding-top: 0; }
+  .scenario-list b { color: var(--blue); }
+  .demo-run { display: grid; gap: 10px; }
+  .demo-step {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff;
+  }
+  .demo-step-num {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    display: inline-grid;
+    place-items: center;
+    font-weight: 850;
+    font-size: 0.86rem;
+  }
+  .demo-step strong { display: block; margin-bottom: 3px; }
+  .demo-step span { color: var(--muted); font-size: 0.9rem; }
+  .boundary {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .boundary-box {
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    background: #fff;
+  }
+  .boundary-box b { display: block; margin-bottom: 5px; }
+  .boundary-box span { color: var(--muted); font-size: 0.9rem; }
+  .boundary-box.yes { border-color: #bbf7d0; background: #f0fdf4; }
+  .boundary-box.no { border-color: #fecaca; background: #fff1f0; }
+
+  .faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  details {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 15px 16px;
+  }
+  summary { cursor: pointer; font-weight: 850; }
+  details p { color: var(--muted); margin: 10px 0 0; font-size: 0.92rem; }
+  .callout {
+    background: #111827;
+    color: #f9fafb;
+    border-radius: 8px;
+    padding: 28px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 20px;
+    align-items: center;
+  }
+  .callout h2 { margin: 0 0 8px; color: #fff; }
+  .callout p { margin: 0; color: #cbd5e1; }
+  .callout .button { border-color: #4b5563; background: #fff; color: var(--navy); }
+
+  @media (max-width: 1020px) {
+    .hero-inner, .split { grid-template-columns: 1fr; }
+    .cards, .workflow, .faq { grid-template-columns: 1fr 1fr; }
+    .product-shot { max-width: 760px; }
+    .before-after { grid-template-columns: 1fr; }
+    .scenario-grid { grid-template-columns: 1fr; }
+    .arrow-column { min-height: 54px; }
+    .mock-meta, .mock-foot { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 720px) {
+    .nav-inner { align-items: flex-start; flex-direction: column; padding: 14px 18px; }
+    .hero { min-height: auto; padding: 36px 18px; }
+    section { padding: 46px 18px; }
+    .proof-strip, .shot-metrics, .cards, .workflow, .faq { grid-template-columns: 1fr; }
+    .shot-row { grid-template-columns: 1fr; }
+    .matrix-row { grid-template-columns: 1fr; }
+    .list-item { grid-template-columns: 1fr; }
+    .callout { grid-template-columns: 1fr; }
+    .scenario-list li, .boundary { grid-template-columns: 1fr; }
+    .mock-row, .mock-row.action { grid-template-columns: 1fr; }
+    .diagram-wrap { overflow-x: auto; }
+    .diagram-wrap svg { min-width: 820px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="brand">DSO Report Reviewer</div>
+      <div class="links">
+        <a href="#what">What</a>
+        <a href="#why">Why</a>
+        <a href="#where">Where</a>
+        <a href="#how">How</a>
+        <a href="#mvp">MVP demo</a>
+        <a href="#faq">Questions</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="eyebrow"><span class="dot"></span> Customer pitch brief</div>
+        <h1>Security scan reports your teams can act on.</h1>
+        <p class="lead">DSO Report Reviewer turns raw CI/CD scanner exports into a reviewer-ready XLSX and executive summary: prioritized findings, residual severity, practical remediation, and clear human approval flags.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#what">Explain it in 2 minutes</a>
+          <a class="button" href="#faq">Common customer questions</a>
+        </div>
+        <div class="proof-strip" aria-label="Proof points">
+          <div class="proof"><strong>361</strong><span>findings triaged in one sample run</span></div>
+          <div class="proof"><strong>100%</strong><span>row coverage checked by validator</span></div>
+          <div class="proof"><strong>Human gate</strong><span>for severity judgment and exceptions</span></div>
+        </div>
+      </div>
+
+      <div class="product-shot" aria-label="Product interface preview">
+        <div class="shot-bar">
+          <span>Operator view: build-92619</span>
+          <span class="pill ok">completed</span>
+        </div>
+        <div class="shot-content">
+          <div class="shot-metrics">
+            <div class="shot-metric"><span>Total</span><strong>361</strong></div>
+            <div class="shot-metric"><span>Critical / High</span><strong>305</strong></div>
+            <div class="shot-metric"><span>Review</span><strong>32</strong></div>
+            <div class="shot-metric"><span>Failed QC</span><strong>0</strong></div>
+          </div>
+          <div class="shot-table">
+            <div class="shot-row shot-head">
+              <span>Finding</span><span>Original</span><span>Residual</span><span>Status</span>
+            </div>
+            <div class="shot-row">
+              <span>Apache Tomcat CVE - upgrade to 10.1.56</span>
+              <span class="pill critical">Critical</span>
+              <span class="pill critical">Critical</span>
+              <span class="pill ok">ready</span>
+            </div>
+            <div class="shot-row">
+              <span>Production secret in container artifact</span>
+              <span class="pill high">High</span>
+              <span class="pill critical">Critical</span>
+              <span class="pill review">review</span>
+            </div>
+            <div class="shot-row">
+              <span>Python package fixed version available</span>
+              <span class="pill high">High</span>
+              <span class="pill high">High</span>
+              <span class="pill info">pip command</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="what">
+    <div class="section-head">
+      <div class="section-kicker">1. What is it?</div>
+      <h2>A report reviewer agent for security scan outputs.</h2>
+      <p>It does not replace scanners. It sits after scanners and converts noisy technical output into a consistent, reviewable security report.</p>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <h3>Input</h3>
+        <p>CI/CD XLSX reports from Black Duck, Coverity, Checkpoint CVE, Checkpoint Secret, and Checkpoint Threat sheets.</p>
+      </div>
+      <div class="card">
+        <h3>Processing</h3>
+        <p>Applies app priority, scanner-specific rules, residual severity logic, remediation guidance, and structural validation.</p>
+      </div>
+      <div class="card">
+        <h3>Output</h3>
+        <p>Annotated XLSX, executive markdown summary, and a queue of rows that require human approval before final sign-off.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="why">
+    <div class="section-head">
+      <div class="section-kicker">2. Why should a customer have it?</div>
+      <h2>Because raw scanner results do not tell engineering what to do next.</h2>
+      <p>The value is not another scan. The value is consistent decision support after the scan finishes.</p>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <h3>Reduce triage load</h3>
+        <p>Security teams stop reading hundreds of repeated rows manually and focus on exceptions, critical assets, and policy decisions.</p>
+      </div>
+      <div class="card">
+        <h3>Improve consistency</h3>
+        <p>The same severity and app-impact rules are applied to every row, every build, independent of analyst fatigue or skill gap.</p>
+      </div>
+      <div class="card">
+        <h3>Make remediation usable</h3>
+        <p>Scanner text like "upgrade package" becomes practical guidance such as package-manager commands or Docker rebuild direction when evidence supports it.</p>
+      </div>
+      <div class="card">
+        <h3>Keep accountability</h3>
+        <p>The agent drafts recommendations, but risky severity changes and uncertain rows remain under human review.</p>
+      </div>
+      <div class="card">
+        <h3>Speed up release gates</h3>
+        <p>Pipeline teams get a fast risk summary after each scan instead of waiting days for manual security review.</p>
+      </div>
+      <div class="card">
+        <h3>Create audit evidence</h3>
+        <p>Each report keeps the decision, severity, remediation, and validation status in a repeatable format.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="where">
+    <div class="section-head">
+      <div class="section-kicker">3. Where can it be used?</div>
+      <h2>Place it after scanning, before approval or ticket creation.</h2>
+      <p>The most realistic deployment is a container receiving a webhook when pipeline scans finish.</p>
+    </div>
+    <div class="split">
+      <div class="list">
+        <div class="list-item">
+          <b>CI/CD</b>
+          <span>Pipeline uploads the scanner report. Reviewer returns annotated results for security gate review.</span>
+        </div>
+        <div class="list-item">
+          <b>AppSec</b>
+          <span>Application security engineers review only flagged rows instead of every raw scanner finding.</span>
+        </div>
+        <div class="list-item">
+          <b>Dev teams</b>
+          <span>Developers receive concrete remediation guidance and priority context for their application.</span>
+        </div>
+        <div class="list-item">
+          <b>Governance</b>
+          <span>Managers get a concise summary of critical risks, timelines, and exceptions needing approval.</span>
+        </div>
+      </div>
+      <div class="matrix">
+        <div class="matrix-row matrix-head">
+          <div class="matrix-cell">Environment point</div>
+          <div class="matrix-cell">How it fits</div>
+          <div class="matrix-cell">Output</div>
+        </div>
+        <div class="matrix-row">
+          <div class="matrix-cell">Jenkins, GitLab, GitHub Actions, Azure DevOps</div>
+          <div class="matrix-cell">Webhook calls reviewer after scan artifact is ready</div>
+          <div class="matrix-cell">Job status, XLSX, summary</div>
+        </div>
+        <div class="matrix-row">
+          <div class="matrix-cell">Container platform</div>
+          <div class="matrix-cell">Runs as internal service with mounted output storage</div>
+          <div class="matrix-cell">Per-build review folder</div>
+        </div>
+        <div class="matrix-row">
+          <div class="matrix-cell">Ticketing later</div>
+          <div class="matrix-cell">Can feed Jira or ServiceNow after human approval</div>
+          <div class="matrix-cell">Approved action items</div>
+        </div>
+      </div>
+    </div>
+    <div class="diagram-wrap" aria-label="Deployment architecture diagram">
+      <div class="diagram-title">
+        <span>Deployment picture: after scan, before approval</span>
+        <span>Internal container service</span>
+      </div>
+      <svg viewBox="0 0 1180 460" role="img" aria-labelledby="deployTitle deployDesc" xmlns="http://www.w3.org/2000/svg">
+        <title id="deployTitle">DSO Report Reviewer deployment architecture</title>
+        <desc id="deployDesc">A CI pipeline sends scan artifacts to the reviewer container, which writes annotated reports and review decisions for security and engineering teams.</desc>
+        <defs>
+          <marker id="deployArrow" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,10 L11,5 z" fill="#2458d3"/>
+          </marker>
+          <style>
+            .d-bg { fill: #ffffff; }
+            .d-zone { fill: #f8fafc; stroke: #d8e0ea; stroke-width: 2; }
+            .d-box { fill: #ffffff; stroke: #b8c5d5; stroke-width: 2; }
+            .d-blue { fill: #eff6ff; stroke: #2458d3; stroke-width: 2; }
+            .d-green { fill: #effaf3; stroke: #177245; stroke-width: 2; }
+            .d-purple { fill: #f4efff; stroke: #6741a3; stroke-width: 2; }
+            .d-title { fill: #17202c; font: 800 18px Inter, system-ui, sans-serif; }
+            .d-small { fill: #5f6f83; font: 600 13px Inter, system-ui, sans-serif; }
+            .d-kicker { fill: #2458d3; font: 850 11px Inter, system-ui, sans-serif; letter-spacing: 1px; }
+            .d-line { stroke: #2458d3; stroke-width: 3; fill: none; marker-end: url(#deployArrow); }
+            .d-dash { stroke: #6741a3; stroke-width: 3; stroke-dasharray: 8 7; fill: none; marker-end: url(#deployArrow); }
+            .d-note { fill: #4b5d73; font: 650 12px Inter, system-ui, sans-serif; }
+          </style>
+        </defs>
+        <rect class="d-bg" width="1180" height="460"/>
+
+        <rect class="d-zone" x="28" y="34" width="254" height="342" rx="8"/>
+        <text class="d-kicker" x="52" y="70">CUSTOMER CI/CD</text>
+        <rect class="d-box" x="52" y="100" width="206" height="74" rx="8"/>
+        <text class="d-title" x="74" y="132">Build pipeline</text>
+        <text class="d-small" x="74" y="154">Jenkins / GitLab / ADO</text>
+        <rect class="d-box" x="52" y="214" width="206" height="92" rx="8"/>
+        <text class="d-title" x="74" y="248">Security scanners</text>
+        <text class="d-small" x="74" y="270">Black Duck, Coverity,</text>
+        <text class="d-small" x="74" y="290">Checkpoint export XLSX</text>
+
+        <path class="d-line" d="M258 260 H342"/>
+
+        <rect class="d-zone" x="352" y="34" width="474" height="342" rx="8"/>
+        <text class="d-kicker" x="376" y="70">REVIEWER CONTAINER</text>
+        <rect class="d-blue" x="376" y="100" width="182" height="84" rx="8"/>
+        <text class="d-title" x="400" y="132">Webhook API</text>
+        <text class="d-small" x="400" y="154">Receives job metadata</text>
+        <text class="d-small" x="400" y="172">and artifact URL</text>
+        <rect class="d-blue" x="620" y="100" width="182" height="84" rx="8"/>
+        <text class="d-title" x="644" y="132">Reviewer agent</text>
+        <text class="d-small" x="644" y="154">Severity, impact,</text>
+        <text class="d-small" x="644" y="172">remediation draft</text>
+        <rect class="d-purple" x="376" y="236" width="182" height="84" rx="8"/>
+        <text class="d-title" x="400" y="268">Validator</text>
+        <text class="d-small" x="400" y="290">Coverage, enums,</text>
+        <text class="d-small" x="400" y="308">required fields</text>
+        <rect class="d-green" x="620" y="236" width="182" height="84" rx="8"/>
+        <text class="d-title" x="644" y="268">Outputs</text>
+        <text class="d-small" x="644" y="290">Annotated XLSX,</text>
+        <text class="d-small" x="644" y="308">summary, flags</text>
+        <path class="d-line" d="M558 142 H610"/>
+        <text class="d-small" x="574" y="112">job accepted</text>
+        <path class="d-line" d="M711 184 V226"/>
+        <text class="d-small" x="724" y="211">draft done</text>
+        <path class="d-line" d="M620 278 H568"/>
+        <path class="d-dash" d="M467 236 C438 214, 464 188, 515 178 C552 169, 580 160, 610 154"/>
+        <text class="d-note" x="386" y="204">retry loop:</text>
+        <text class="d-note" x="386" y="221">missing row, bad enum, empty control</text>
+
+        <path class="d-line" d="M826 278 H912"/>
+        <text class="d-note" x="838" y="262">valid output</text>
+
+        <rect class="d-zone" x="922" y="34" width="230" height="342" rx="8"/>
+        <text class="d-kicker" x="946" y="70">CUSTOMER TEAMS</text>
+        <rect class="d-box" x="946" y="100" width="182" height="74" rx="8"/>
+        <text class="d-title" x="970" y="132">Security review</text>
+        <text class="d-small" x="970" y="154">Approve flagged rows</text>
+        <rect class="d-box" x="946" y="214" width="182" height="92" rx="8"/>
+        <text class="d-title" x="970" y="248">Engineering</text>
+        <text class="d-small" x="970" y="270">Fix with concrete</text>
+        <text class="d-small" x="970" y="290">remediation guidance</text>
+
+        <rect class="d-green" x="244" y="398" width="692" height="48" rx="8"/>
+        <text class="d-small" x="590" y="418" text-anchor="middle">Important control: the agent drafts the decision.</text>
+        <text class="d-small" x="590" y="436" text-anchor="middle">Final risk acceptance stays with the customer security reviewer.</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="band" id="how">
+    <div class="section-head">
+      <div class="section-kicker">4. How it works</div>
+      <h2>A small pipeline with a clear human control point.</h2>
+      <p>The agent is useful because the deterministic checks and approval gates are built into the workflow.</p>
+    </div>
+    <div class="workflow">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Scan finishes</h3>
+        <p>Existing scanner exports the report as a build artifact.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Webhook received</h3>
+        <p>Pipeline sends job metadata and artifact URL to the reviewer container.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Agent reviews</h3>
+        <p>Rows are normalized, prioritized, enriched with remediation, and assigned draft residual severity.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h3>Validation runs</h3>
+        <p>Coverage, valid severity values, and required output fields are checked automatically.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <h3>Human signs off</h3>
+        <p>Security reviews flagged rows before the report drives acceptance, tickets, or release decisions.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div class="section-kicker">5. What can we prove in a demo?</div>
+      <h2>Show the technical mockup: raw scanner rows become reviewer-ready decisions.</h2>
+      <p>The demo should look like the real handoff: imported XLSX rows on the left, validated output fields on the right.</p>
+    </div>
+    <div class="mock-meta" aria-label="Demo job metadata">
+      <div><b>Input artifact</b><span>checkpoint-coverity-build-92619.xlsx</span></div>
+      <div><b>Validation rule</b><span>100% row coverage, valid severity enum, control filled</span></div>
+      <div><b>Human gate</b><span>severity jumps and exceptions stay reviewer-owned</span></div>
+    </div>
+    <div class="before-after" aria-label="Before and after report transformation">
+      <div class="picture-panel">
+        <div class="picture-head">
+          <span>Before: scanner XLSX export</span>
+          <span class="pill high">noisy</span>
+        </div>
+        <div class="picture-body">
+          <div class="mock-table">
+            <div class="mock-row mock-head">
+              <span>Finding</span><span>Severity</span><span>Scanner text</span>
+            </div>
+            <div class="mock-row">
+              <div class="mock-cell"><strong>Apache Tomcat CVE</strong><span>component: tomcat-embed-core</span></div>
+              <span class="pill critical">Critical</span>
+              <div class="mock-code">Upgrade component. Fixed in 10.1.56.</div>
+            </div>
+            <div class="mock-row">
+              <div class="mock-cell"><strong>OpenSSL package CVE</strong><span>image: payments-api:92619</span></div>
+              <span class="pill high">High</span>
+              <div class="mock-code">Package has fixed version available.</div>
+            </div>
+            <div class="mock-row">
+              <div class="mock-cell"><strong>Secret found in config</strong><span>file: appsettings.prod.json</span></div>
+              <span class="pill high">High</span>
+              <div class="mock-code">Potential credential exposure detected.</div>
+            </div>
+          </div>
+          <div class="mock-foot">
+            <span>Missing owner context</span>
+            <span>Generic remediation</span>
+            <span>No approval flag</span>
+          </div>
+        </div>
+      </div>
+      <div class="arrow-column" aria-hidden="true">
+        <div class="arrow-badge">→</div>
+      </div>
+      <div class="picture-panel">
+        <div class="picture-head">
+          <span>After: reviewer XLSX + summary</span>
+          <span class="pill ok">actionable</span>
+        </div>
+        <div class="picture-body">
+          <div class="mock-table">
+            <div class="mock-row action mock-head">
+              <span>Decision</span><span>Residual</span><span>Flag</span><span>Reviewer guidance</span>
+            </div>
+            <div class="mock-row action">
+              <div class="mock-cell"><strong>Maintain Critical</strong><span>high-priority app</span></div>
+              <span class="pill critical">Critical</span>
+              <span class="pill ok">ready</span>
+              <div class="mock-code">Upgrade Tomcat to 10.1.56. Keep ACL control until deployed.</div>
+            </div>
+            <div class="mock-row action">
+              <div class="mock-cell"><strong>Rebuild image</strong><span>container package path</span></div>
+              <span class="pill high">High</span>
+              <span class="pill info">container</span>
+              <div class="mock-code">Rebuild from patched base image with fixed libssl/libcrypto.</div>
+            </div>
+            <div class="mock-row action">
+              <div class="mock-cell"><strong>Escalate if real</strong><span>credential confirmation needed</span></div>
+              <span class="pill critical">Critical</span>
+              <span class="pill review">review</span>
+              <div class="mock-code">Confirm exposure, rotate secret, reviewer approves final severity.</div>
+            </div>
+          </div>
+          <div class="mock-foot">
+            <span>Coverage: 361/361 rows</span>
+            <span>QC failures: 0</span>
+            <span>Review queue: 32 rows</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="mvp">
+    <div class="section-head">
+      <div class="section-kicker">MVP demo scenario</div>
+      <h2>Demo one payment application scan from pipeline finish to review-ready report.</h2>
+      <p>Keep the first demo narrow: one application, one build artifact, one review workflow, no ticket automation.</p>
+    </div>
+    <div class="scenario-grid">
+      <div class="scenario-card">
+        <h3>Scenario setup</h3>
+        <ul class="scenario-list">
+          <li><b>Customer</b><span>Digital banking or payments team with CI/CD security scanning already enabled.</span></li>
+          <li><b>Application</b><span>High-priority API such as `ap2065` payment service.</span></li>
+          <li><b>Input</b><span>One mixed XLSX scan export containing Black Duck, Coverity, Checkpoint CVE, and Checkpoint Secret sheets.</span></li>
+          <li><b>Trigger</b><span>Pipeline scan finishes and sends webhook metadata plus artifact URL to the reviewer container.</span></li>
+          <li><b>Output</b><span>Annotated XLSX, executive markdown summary, and human review queue for flagged rows.</span></li>
+        </ul>
+      </div>
+
+      <div class="scenario-card">
+        <h3>10-minute room demo</h3>
+        <div class="demo-run">
+          <div class="demo-step">
+            <span class="demo-step-num">1</span>
+            <div><strong>Show the raw scanner report</strong><span>Open the XLSX with hundreds of rows and point out generic scanner remediation.</span></div>
+          </div>
+          <div class="demo-step">
+            <span class="demo-step-num">2</span>
+            <div><strong>Submit the artifact URL</strong><span>Use the operator UI to create a mock job for `build-92619` and `ap2065` high priority.</span></div>
+          </div>
+          <div class="demo-step">
+            <span class="demo-step-num">3</span>
+            <div><strong>Explain the reviewer loop</strong><span>The agent drafts severity/remediation, validator checks row coverage, and invalid output loops back once.</span></div>
+          </div>
+          <div class="demo-step">
+            <span class="demo-step-num">4</span>
+            <div><strong>Show three findings</strong><span>Tomcat upgrade, container rebuild, and secret exposure with human approval flag.</span></div>
+          </div>
+          <div class="demo-step">
+            <span class="demo-step-num">5</span>
+            <div><strong>Close with the management outcome</strong><span>Security reviews 32 flagged rows instead of manually triaging 361 raw findings.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="boundary" aria-label="MVP boundaries">
+      <div class="boundary-box yes">
+        <b>MVP includes</b>
+        <span>Report intake, priority mapping, draft residual severity, concrete remediation text, structural validation, annotated XLSX, markdown summary, and human review flags.</span>
+      </div>
+      <div class="boundary-box no">
+        <b>MVP does not include</b>
+        <span>No auto risk acceptance, no Jira or ServiceNow creation, no PR comments, no production release blocking until approval rules are proven.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="faq">
+    <div class="section-head">
+      <div class="section-kicker">Common customer questions</div>
+      <h2>Answers your boss can use in the room.</h2>
+      <p>Use these as talk tracks when the customer asks about fit, security, accuracy, and ownership.</p>
+    </div>
+    <div class="faq">
+      <details open>
+        <summary>Is this replacing our security scanners?</summary>
+        <p>No. It consumes scanner output after Black Duck, Coverity, or Checkpoint finish. The scanners still detect issues; this reviewer turns findings into prioritized, actionable review output.</p>
+      </details>
+      <details open>
+        <summary>Can it decide risk automatically?</summary>
+        <p>It can draft residual severity and remediation, but final risk acceptance stays human-gated. Critical downgrades, severity jumps, validation failures, and uncertain rows are flagged for review.</p>
+      </details>
+      <details>
+        <summary>Where does it run?</summary>
+        <p>As an internal container service. The pipeline sends a webhook with artifact metadata after scan completion. The service downloads the report, processes it, and stores outputs in an internal job folder.</p>
+      </details>
+      <details>
+        <summary>What data does it need?</summary>
+        <p>Scanner report, project or app code, priority mapping, and optional build metadata. More accurate environment context improves residual severity quality.</p>
+      </details>
+      <details>
+        <summary>How do we trust the output?</summary>
+        <p>The system validates row coverage and output shape independently of the model. The semantic decisions are transparent in the XLSX and remain reviewable by security engineers.</p>
+      </details>
+      <details>
+        <summary>What happens when the agent is wrong?</summary>
+        <p>The reviewer can override the row. Repeated corrections should become deterministic rules or config, so the same correction does not need to be repeated manually.</p>
+      </details>
+      <details>
+        <summary>Can it create Jira or ServiceNow tickets?</summary>
+        <p>Yes, but that should be phase two. V1 should produce reviewed artifacts first. Ticket creation should happen only after dedupe, ownership, and approval rules are stable.</p>
+      </details>
+      <details>
+        <summary>What is the smallest valuable rollout?</summary>
+        <p>Start with one pipeline, one application group, and one report format. Prove time saved, review quality, and false-positive handling before expanding to ticket automation.</p>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="callout">
+      <div>
+        <h2>Pitch line</h2>
+        <p>DSO Report Reviewer does not add another scanner. It turns existing scan results into consistent, actionable, human-approved remediation decisions at CI/CD speed.</p>
+      </div>
+      <a class="button" href="ui/index.html">Open operator UI</a>
+    </div>
+  </section>
+</div>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSO Report Reviewer MVP Demo Runbook</title>
+<style>
+  :root {
+    --bg: #f5f7fb;
+    --paper: #ffffff;
+    --ink: #17202c;
+    --muted: #627083;
+    --line: #d8e0ea;
+    --blue: #2458d3;
+    --green: #177245;
+    --amber: #a65f00;
+    --red: #b42318;
+    --purple: #6741a3;
+    --navy: #111827;
+    --shadow: 0 14px 34px rgba(17, 24, 39, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+  code, pre {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+  .layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+  }
+  aside {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    background: var(--navy);
+    color: #f8fafc;
+    padding: 22px 16px;
+  }
+  .brand { font-weight: 850; margin-bottom: 4px; }
+  .sub { color: #aeb8c6; font-size: 0.82rem; margin-bottom: 22px; }
+  nav { display: grid; gap: 6px; }
+  nav a {
+    color: #d1d5db;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 0.9rem;
+  }
+  nav a:hover { background: #1f2937; color: #fff; }
+  main { min-width: 0; }
+  header {
+    background: #ffffff;
+    border-bottom: 1px solid var(--line);
+    padding: 28px;
+  }
+  h1 {
+    margin: 0 0 10px;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    line-height: 1;
+  }
+  .lead { margin: 0; color: var(--muted); max-width: 850px; font-size: 1.04rem; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    border-radius: 8px;
+    padding: 8px 12px;
+    text-decoration: none;
+    font-weight: 800;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    background: #fff;
+  }
+  .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .content { padding: 24px; display: grid; gap: 20px; }
+  section {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+  }
+  h2 { margin: 0 0 12px; font-size: 1.3rem; }
+  h3 { margin: 18px 0 8px; font-size: 1rem; }
+  p { color: var(--muted); }
+  .grid { display: grid; gap: 12px; }
+  .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tile {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f8fafc;
+    padding: 14px;
+  }
+  .tile b { display: block; margin-bottom: 4px; color: var(--blue); }
+  .tile span { color: var(--muted); font-size: 0.92rem; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+  }
+  th, td {
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 12px;
+    vertical-align: top;
+    font-size: 0.92rem;
+  }
+  th {
+    background: #f1f5f9;
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  tr:last-child td { border-bottom: 0; }
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    margin: 10px 0;
+  }
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(140px, 1fr));
+    gap: 10px;
+    overflow-x: auto;
+  }
+  .step {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    background: #fff;
+    min-height: 150px;
+  }
+  .num {
+    width: 28px;
+    height: 28px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--blue);
+    font-weight: 850;
+    margin-bottom: 9px;
+  }
+  .step strong { display: block; margin-bottom: 6px; }
+  .step span { color: var(--muted); font-size: 0.88rem; }
+  .badge {
+    display: inline-flex;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-weight: 850;
+    font-size: 0.76rem;
+  }
+  .badge.good { color: var(--green); background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .badge.warn { color: var(--amber); background: #fffbeb; border: 1px solid #fde68a; }
+  .badge.bad { color: var(--red); background: #fff1f0; border: 1px solid #fecaca; }
+  .callout {
+    border-left: 4px solid var(--blue);
+    background: #eff6ff;
+    border-radius: 8px;
+    padding: 14px;
+    color: #1e3a8a;
+  }
+  .checklist label {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    border-top: 1px solid var(--line);
+    padding: 10px 0;
+    color: var(--muted);
+  }
+  .checklist label:first-child { border-top: 0; }
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--blue);
+    flex: 0 0 auto;
+  }
+  .copy-row { display: flex; gap: 8px; align-items: flex-start; }
+  .copy-row pre { flex: 1; }
+  button.copy {
+    min-height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    font-weight: 800;
+    cursor: pointer;
+    padding: 7px 10px;
+    margin-top: 10px;
+  }
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; }
+    .grid.two, .grid.three { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 720px) {
+    header, .content { padding: 16px; }
+    section { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand">MVP Demo Runbook</div>
+    <div class="sub">DSO Report Reviewer</div>
+    <nav>
+      <a href="#purpose">Purpose</a>
+      <a href="#preconditions">Preconditions</a>
+      <a href="#data">Demo Data</a>
+      <a href="#start">Start Agent</a>
+      <a href="#flow">Room Flow</a>
+      <a href="#acceptance">Acceptance</a>
+      <a href="#troubleshooting">Troubleshooting</a>
+      <a href="#rollback">Rollback</a>
+      <a href="#change-rule">Change Rule</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header>
+      <h1>DSO Report Reviewer MVP Demo Runbook</h1>
+      <p class="lead">Run a controlled customer-facing demo showing how a scan artifact becomes an annotated XLSX, executive markdown summary, and human review queue.</p>
+      <div class="actions">
+        <a class="btn primary" href="http://127.0.0.1:8088/customer-pitch.html">Open Customer Pitch</a>
+        <a class="btn" href="http://127.0.0.1:8088/ui/index.html">Open Operator UI</a>
+        <a class="btn" href="http://127.0.0.1:8088/healthz">Health Check</a>
+      </div>
+    </header>
+
+    <div class="content">
+      <section id="purpose">
+        <h2>Purpose</h2>
+        <div class="grid two">
+          <div class="tile"><b>Current MVP</b><span>Local demo agent, deterministic findings, and human approval gate.</span></div>
+          <div class="tile"><b>Not Production</b><span>No live scanner integration, no Jira/ServiceNow, and no automatic risk acceptance.</span></div>
+        </div>
+        <div class="callout">Downloaded XLSX/markdown must reflect reviewer approval decisions. UI-only status changes are not acceptable for this demo.</div>
+      </section>
+
+      <section id="preconditions">
+        <h2>Preconditions</h2>
+        <div class="checklist">
+          <label><input type="checkbox"> Repo checkout is available on the demo machine.</label>
+          <label><input type="checkbox"> Python dependencies can run through <code>uv</code>.</label>
+          <label><input type="checkbox"> Browser can open <code>http://127.0.0.1:8088</code>.</label>
+          <label><input type="checkbox"> Port <code>8088</code> is free.</label>
+          <label><input type="checkbox"> Branch contains <code>demo_agent.py</code>, <code>scripts/start-demo.sh</code>, <code>ui/index.html</code>, <code>customer-pitch.html</code>, and <code>docs/OPERATOR-UI.md</code>.</label>
+        </div>
+      </section>
+
+      <section id="data">
+        <h2>Demo Data</h2>
+        <div class="grid two">
+          <table>
+            <thead><tr><th>Field</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Job ID</td><td><code>build-92619</code></td></tr>
+              <tr><td>Project</td><td><code>ap2065</code></td></tr>
+              <tr><td>Priority</td><td><code>high</code></td></tr>
+              <tr><td>Scanner</td><td><code>mixed</code></td></tr>
+              <tr><td>Artifact URL</td><td><code>https://ci.example/artifacts/report.xlsx</code></td></tr>
+            </tbody>
+          </table>
+          <table>
+            <thead><tr><th>Metric</th><th>Expected</th></tr></thead>
+            <tbody>
+              <tr><td>Findings</td><td><code>4</code></td></tr>
+              <tr><td>Validation failed rows</td><td><code>1</code></td></tr>
+              <tr><td>Severity review rows</td><td><code>1</code> before approval</td></tr>
+              <tr><td>Pending review rows</td><td><code>2</code> before approval, <code>1</code> after approving row <code>18</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="start">
+        <h2>Start Demo Agent</h2>
+        <div class="copy-row">
+          <pre>./scripts/start-demo.sh</pre>
+          <button class="copy" type="button" data-copy="./scripts/start-demo.sh">Copy</button>
+        </div>
+        <p>Keep this process running during the demo. It prints the customer pitch, operator UI, and runbook URLs after the health check passes. The script uses a repo-local <code>.uv-cache/</code> by default so it can run in restricted environments.</p>
+        <h3>Manual Start Fallback</h3>
+        <div class="copy-row">
+          <pre>uv run --with openpyxl python demo_agent.py --host 127.0.0.1 --port 8088</pre>
+          <button class="copy" type="button" data-copy="uv run --with openpyxl python demo_agent.py --host 127.0.0.1 --port 8088">Copy</button>
+        </div>
+        <h3>Health Check</h3>
+        <div class="copy-row">
+          <pre>curl -s http://127.0.0.1:8088/healthz</pre>
+          <button class="copy" type="button" data-copy="curl -s http://127.0.0.1:8088/healthz">Copy</button>
+        </div>
+        <p>Expected response: <code>{"status":"ok"}</code></p>
+      </section>
+
+      <section id="flow">
+        <h2>Room Demo Flow</h2>
+        <div class="flow">
+          <div class="step"><span class="num">1</span><strong>Open pitch</strong><span>Use <code>/customer-pitch.html</code>. Explain this is not another scanner; it reviews scanner output.</span></div>
+          <div class="step"><span class="num">2</span><strong>Open UI</strong><span>Use <code>/ui/index.html</code>. Confirm demo agent online status.</span></div>
+          <div class="step"><span class="num">3</span><strong>Reset demo</strong><span>Click <code>Reset demo</code>. This restores <code>build-92619</code> to the clean pre-approval state.</span></div>
+          <div class="step"><span class="num">4</span><strong>Run demo job</strong><span>Click <code>Run demo job</code>. Confirm <code>build-92619</code> completes with 4 findings.</span></div>
+          <div class="step"><span class="num">5</span><strong>Before approval</strong><span>Open <code>/outputs/summary.md</code>. Rows 18 and 33 should be in Human Review Queue.</span></div>
+          <div class="step"><span class="num">6</span><strong>Approve row 18</strong><span>Approve <code>Production secret in application-prod.yml</code>. UI reloads from demo agent.</span></div>
+          <div class="step"><span class="num">7</span><strong>After approval</strong><span>Summary shows row 18 under Approved Review Decisions and row 33 still pending.</span></div>
+        </div>
+
+        <h3>Reset Demo By API</h3>
+        <div class="copy-row">
+          <pre>curl -s -X POST http://127.0.0.1:8088/demo/reset</pre>
+          <button class="copy" type="button" data-copy="curl -s -X POST http://127.0.0.1:8088/demo/reset">Copy</button>
+        </div>
+
+        <h3>Create Demo Job By API</h3>
+        <div class="copy-row">
+          <pre>curl -s -X POST http://127.0.0.1:8088/webhooks/scan-finished \
+  -H 'Content-Type: application/json' \
+  -d '{"job_id":"build-92619","project":"ap2065","priority":"high","scanner":"mixed","artifact_url":"https://ci.example/artifacts/report.xlsx"}'</pre>
+          <button class="copy" type="button" data-copy="curl -s -X POST http://127.0.0.1:8088/webhooks/scan-finished -H 'Content-Type: application/json' -d '{&quot;job_id&quot;:&quot;build-92619&quot;,&quot;project&quot;:&quot;ap2065&quot;,&quot;priority&quot;:&quot;high&quot;,&quot;scanner&quot;:&quot;mixed&quot;,&quot;artifact_url&quot;:&quot;https://ci.example/artifacts/report.xlsx&quot;}'">Copy</button>
+        </div>
+
+        <h3>Approve Row 18 By API</h3>
+        <div class="copy-row">
+          <pre>curl -s -X POST http://127.0.0.1:8088/jobs/build-92619/reviews \
+  -H 'Content-Type: application/json' \
+  -d '{"row_id":18,"review_status":"approved","reviewer_note":"Approved after confirming credential rotation plan."}'</pre>
+          <button class="copy" type="button" data-copy="curl -s -X POST http://127.0.0.1:8088/jobs/build-92619/reviews -H 'Content-Type: application/json' -d '{&quot;row_id&quot;:18,&quot;review_status&quot;:&quot;approved&quot;,&quot;reviewer_note&quot;:&quot;Approved after confirming credential rotation plan.&quot;}'">Copy</button>
+        </div>
+
+        <h3>Output URLs</h3>
+        <div class="grid two">
+          <div class="tile"><b>Summary</b><span><code>http://127.0.0.1:8088/jobs/build-92619/outputs/summary.md</code></span></div>
+          <div class="tile"><b>Annotated XLSX</b><span><code>http://127.0.0.1:8088/jobs/build-92619/outputs/annotated.xlsx</code></span></div>
+        </div>
+      </section>
+
+      <section id="acceptance">
+        <h2>Acceptance Criteria</h2>
+        <div class="checklist">
+          <label><input type="checkbox"> Customer pitch page opens.</label>
+          <label><input type="checkbox"> Operator UI opens.</label>
+          <label><input type="checkbox"> Demo agent health check passes.</label>
+          <label><input type="checkbox"> <code>Reset demo</code> restores row <code>18</code> to pending before the customer flow.</label>
+          <label><input type="checkbox"> <code>Run demo job</code> creates or refreshes <code>build-92619</code>.</label>
+          <label><input type="checkbox"> Findings table loads from the agent.</label>
+          <label><input type="checkbox"> Summary and XLSX downloads are available.</label>
+          <label><input type="checkbox"> Approving row <code>18</code> persists to downloaded summary and XLSX.</label>
+          <label><input type="checkbox"> Row <code>33</code> remains pending to prove validation failures still require human review.</label>
+        </div>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>Troubleshooting</h2>
+        <table>
+          <thead><tr><th>Symptom</th><th>Check</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td>UI shows fallback mock mode</td><td>Demo agent is not reachable</td><td>Start <code>demo_agent.py</code> on port <code>8088</code></td></tr>
+            <tr><td>Browser cannot open UI</td><td>Wrong URL or server stopped</td><td>Open <code>http://127.0.0.1:8088/ui/index.html</code> and check terminal logs</td></tr>
+            <tr><td>Run demo job does nothing</td><td>Browser cannot call API</td><td>Check <code>GET /healthz</code>; refresh UI</td></tr>
+            <tr><td>Demo starts already approved</td><td>Previous state was reused</td><td>Click <code>Reset demo</code> or call <code>POST /demo/reset</code></td></tr>
+            <tr><td>Download still shows pending after approval</td><td>Approval did not persist through <code>/reviews</code></td><td>Re-run approval and refresh output URL</td></tr>
+            <tr><td>Port already in use</td><td>Another process owns <code>8088</code></td><td>Stop old process or use another port and update URL expectations</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="rollback">
+        <h2>Rollback</h2>
+        <div class="grid two">
+          <div>
+            <h3>Stop Agent</h3>
+            <pre>Ctrl-C</pre>
+          </div>
+          <div>
+            <h3>Remove Generated Output</h3>
+            <pre>rm -rf demo-jobs/</pre>
+          </div>
+        </div>
+        <p>Do not commit generated files under <code>demo-jobs/</code>.</p>
+      </section>
+
+      <section id="change-rule">
+        <h2>Change Rule</h2>
+        <div class="callout">Any MVP demo behavior, endpoint, UI flow, sample job, expected finding, output format, acceptance criterion, or talk track change must update this HTML runbook in the same step.</div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+document.querySelectorAll("[data-copy]").forEach((button) => {
+  button.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(button.dataset.copy);
+      const old = button.textContent;
+      button.textContent = "Copied";
+      setTimeout(() => { button.textContent = old; }, 1200);
+    } catch (error) {
+      button.textContent = "Select text";
+    }
+  });
+});
+</script>
+</body>
+</html>

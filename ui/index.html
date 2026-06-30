@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSO Report Reviewer - Operator UI</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --panel: #ffffff;
+    --panel-soft: #f0f4f8;
+    --line: #d8dee8;
+    --line-strong: #b8c2cf;
+    --text: #18202b;
+    --muted: #627083;
+    --blue: #2563eb;
+    --cyan: #0e7490;
+    --green: #15803d;
+    --amber: #b45309;
+    --red: #b91c1c;
+    --violet: #6d28d9;
+    --shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.45;
+  }
+  button, input, select, textarea { font: inherit; }
+  button { cursor: pointer; }
+  .shell { min-height: 100vh; display: grid; grid-template-columns: 240px minmax(0, 1fr); }
+  .side {
+    background: #111827;
+    color: #f9fafb;
+    padding: 22px 16px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .brand { font-weight: 800; font-size: 1.05rem; margin-bottom: 4px; }
+  .version { color: #9ca3af; font-size: 0.78rem; margin-bottom: 28px; }
+  .nav { display: grid; gap: 6px; }
+  .nav a {
+    color: #d1d5db;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 10px 11px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .nav a:hover, .nav a.active { background: #1f2937; color: #ffffff; }
+  .nav-mark { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); flex: 0 0 auto; }
+  .side-footer {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 18px;
+    border-top: 1px solid #374151;
+    padding-top: 14px;
+    color: #aeb7c5;
+    font-size: 0.78rem;
+  }
+
+  main { min-width: 0; }
+  .topbar {
+    min-height: 68px;
+    background: rgba(255, 255, 255, 0.92);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    backdrop-filter: blur(10px);
+  }
+  .topbar h1 { font-size: 1.12rem; margin: 0; }
+  .topbar p { margin: 2px 0 0; color: var(--muted); font-size: 0.84rem; }
+  .health { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: var(--green); font-weight: 700; }
+  .health-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
+  .health.offline { color: var(--amber); }
+  .health.offline .health-dot { background: var(--amber); }
+  .content { padding: 24px; display: grid; gap: 22px; }
+  .section-title { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+  .section-title h2 { margin: 0; font-size: 1rem; }
+  .section-title span { color: var(--muted); font-size: 0.82rem; }
+
+  .grid { display: grid; gap: 16px; }
+  .grid.two { grid-template-columns: minmax(320px, 430px) minmax(0, 1fr); align-items: start; }
+  .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .panel, .metric {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+  .panel { padding: 18px; }
+  .metric { padding: 16px; min-height: 100px; }
+  .metric-label { color: var(--muted); font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .metric-value { margin-top: 8px; font-size: 1.85rem; line-height: 1; font-weight: 800; }
+  .metric-note { margin-top: 8px; color: var(--muted); font-size: 0.82rem; }
+
+  form { display: grid; gap: 13px; }
+  label { display: grid; gap: 6px; color: var(--muted); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  input, select, textarea {
+    width: 100%;
+    border: 1px solid var(--line-strong);
+    background: #fff;
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 11px;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14); }
+  textarea { resize: vertical; min-height: 74px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .hint { color: var(--muted); font-size: 0.8rem; }
+  .error { display: none; color: var(--red); background: #fef2f2; border: 1px solid #fecaca; padding: 9px 10px; border-radius: 8px; font-size: 0.84rem; }
+  .error.visible { display: block; }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .btn {
+    border: 1px solid var(--line-strong);
+    background: #fff;
+    color: var(--text);
+    border-radius: 8px;
+    min-height: 38px;
+    padding: 8px 13px;
+    font-weight: 750;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+  }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .btn.danger { color: var(--red); border-color: #fecaca; background: #fff7f7; }
+  .btn.small { min-height: 30px; padding: 5px 9px; font-size: 0.8rem; }
+
+  .status-list { display: grid; gap: 10px; }
+  .job {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    background: #fff;
+  }
+  .job.selected { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.11); }
+  .job-title { font-weight: 800; margin-bottom: 3px; }
+  .job-meta { color: var(--muted); font-size: 0.82rem; overflow-wrap: anywhere; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    padding: 3px 8px;
+    min-height: 24px;
+    font-size: 0.73rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .badge.critical { color: var(--red); background: #fef2f2; border-color: #fecaca; }
+  .badge.high { color: var(--amber); background: #fffbeb; border-color: #fde68a; }
+  .badge.medium { color: var(--cyan); background: #ecfeff; border-color: #a5f3fc; }
+  .badge.low { color: var(--green); background: #f0fdf4; border-color: #bbf7d0; }
+  .badge.info { color: var(--muted); background: #f8fafc; border-color: var(--line); }
+  .badge.running { color: var(--blue); background: #eff6ff; border-color: #bfdbfe; }
+  .badge.completed { color: var(--green); background: #f0fdf4; border-color: #bbf7d0; }
+  .badge.failed { color: var(--red); background: #fef2f2; border-color: #fecaca; }
+  .badge.review { color: var(--violet); background: #f5f3ff; border-color: #ddd6fe; }
+  .badge.pending { color: var(--amber); background: #fffbeb; border-color: #fde68a; }
+  .badge.approved { color: var(--green); background: #f0fdf4; border-color: #bbf7d0; }
+
+  .summary-box {
+    background: var(--panel-soft);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    display: grid;
+    gap: 8px;
+  }
+  .summary-box h3 { margin: 0; font-size: 0.95rem; }
+  .summary-box p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+  .filters {
+    display: grid;
+    grid-template-columns: 1.3fr repeat(4, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .table-wrap {
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+  }
+  table { width: 100%; border-collapse: collapse; min-width: 1120px; }
+  th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th {
+    background: #f8fafc;
+    color: var(--muted);
+    font-size: 0.73rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  td { font-size: 0.86rem; }
+  tr:last-child td { border-bottom: none; }
+  .finding-name { font-weight: 800; max-width: 230px; }
+  .muted { color: var(--muted); }
+  .control { max-width: 360px; min-width: 300px; }
+  .actions { min-width: 230px; }
+  .empty {
+    padding: 26px;
+    color: var(--muted);
+    text-align: center;
+    border: 1px dashed var(--line-strong);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  @media (max-width: 1100px) {
+    .shell { grid-template-columns: 1fr; }
+    .side { position: static; height: auto; }
+    .side-footer { position: static; margin-top: 22px; }
+    .grid.two, .metrics, .filters { grid-template-columns: 1fr; }
+    .topbar { position: static; align-items: start; gap: 12px; }
+  }
+  @media (max-width: 620px) {
+    .content { padding: 16px; }
+    .topbar { padding: 14px 16px; flex-direction: column; }
+    .form-row { grid-template-columns: 1fr; }
+    .job { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">DSO Report Reviewer</div>
+    <div class="version">Operator console v0.1</div>
+    <nav class="nav" aria-label="Main navigation">
+      <a class="active" href="#dashboard"><span class="nav-mark"></span>Dashboard</a>
+      <a href="#new-review"><span class="nav-mark"></span>New review</a>
+      <a href="#job-detail"><span class="nav-mark"></span>Job detail</a>
+      <a href="#findings"><span class="nav-mark"></span>Findings</a>
+    </nav>
+    <div class="side-footer">
+      Semantic severity changes remain human-gated. Structural checks run automatically.
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div>
+        <h1>Security scan review workspace</h1>
+        <p>Submit scan artifacts, monitor jobs, review flagged severity decisions, and export reports.</p>
+      </div>
+      <div class="health" id="serviceHealth"><span class="health-dot"></span><span>Checking demo agent</span></div>
+    </header>
+
+    <div class="content">
+      <section id="dashboard">
+        <div class="section-title">
+          <div>
+            <h2>Dashboard</h2>
+            <span>Current selected job: <strong id="selectedJobLabel">build-92619</strong></span>
+          </div>
+          <div class="btn-row">
+            <a class="btn small" href="../customer-pitch.html">Open customer pitch</a>
+            <a class="btn small" href="../docs/MVP-DEMO-RUNBOOK.html">Open runbook</a>
+            <button class="btn small" id="resetDemoButton" type="button">Reset demo</button>
+            <button class="btn small primary" id="runDemoButton" type="button">Run demo job</button>
+            <button class="btn small" id="refreshJobsButton" type="button">Refresh jobs</button>
+            <button class="btn small" id="resetMockButton" type="button">Reset fallback data</button>
+          </div>
+        </div>
+        <div class="grid metrics" id="metrics"></div>
+      </section>
+
+      <section class="grid two" id="new-review">
+        <div class="panel">
+          <div class="section-title">
+            <div>
+              <h2>New review</h2>
+              <span>Use artifact URL for CI/webhook style intake, or upload manually later.</span>
+            </div>
+          </div>
+          <form id="reviewForm" novalidate>
+            <label>
+              Artifact URL
+              <input id="artifactUrl" type="url" placeholder="https://ci.example/artifacts/report.xlsx">
+            </label>
+            <div class="form-row">
+              <label>
+                Project code
+                <input id="projectCode" type="text" placeholder="ap2065" value="ap2065">
+              </label>
+              <label>
+                Priority
+                <select id="priority">
+                  <option value="high">High</option>
+                  <option value="low">Low</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-row">
+              <label>
+                Scanner source
+                <select id="scanner">
+                  <option value="mixed">Mixed workbook</option>
+                  <option value="blackduck">Black Duck</option>
+                  <option value="coverity">Coverity</option>
+                  <option value="checkpoint">Checkpoint</option>
+                </select>
+              </label>
+              <label>
+                Build ID
+                <input id="buildId" type="text" placeholder="build-92700">
+              </label>
+            </div>
+            <label>
+              Reviewer note
+              <textarea id="reviewerNote" placeholder="Optional context for the security reviewer"></textarea>
+            </label>
+            <div class="error" id="formError">Enter either a valid artifact URL or a build ID with a local upload path before submitting.</div>
+            <div class="btn-row">
+              <button class="btn primary" type="submit">Create review job</button>
+              <button class="btn" id="loadSampleButton" type="button">Load sample artifact</button>
+            </div>
+            <div class="hint">When the demo agent is running, this submits to `POST /webhooks/scan-finished`. If not, the UI falls back to local sample data.</div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <div>
+              <h2>Recent jobs</h2>
+              <span>Select a job to update the detail view and findings table.</span>
+            </div>
+          </div>
+          <div class="status-list" id="jobList"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="job-detail">
+        <div class="section-title">
+          <div>
+            <h2>Job detail</h2>
+            <span id="jobDetailSubtitle">Human review is required before final risk acceptance.</span>
+          </div>
+          <div class="btn-row">
+            <button class="btn small" id="downloadXlsx" type="button">Download XLSX</button>
+            <button class="btn small" id="downloadMd" type="button">Download summary</button>
+          </div>
+        </div>
+        <div class="summary-box" id="jobSummary"></div>
+      </section>
+
+      <section class="panel" id="findings">
+        <div class="section-title">
+          <div>
+            <h2>Findings review</h2>
+            <span>Filter flagged rows, approve draft decisions, or record an override note.</span>
+          </div>
+          <span id="findingCount"></span>
+        </div>
+
+        <div class="filters">
+          <input id="searchInput" type="search" placeholder="Search finding, package, CVE, or remediation">
+          <select id="severityFilter">
+            <option value="all">All severities</option>
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+            <option value="Info">Info</option>
+          </select>
+          <select id="scannerFilter">
+            <option value="all">All scanners</option>
+            <option value="Black Duck">Black Duck</option>
+            <option value="Coverity">Coverity</option>
+            <option value="Checkpoint CVE">Checkpoint CVE</option>
+            <option value="Checkpoint Secret">Checkpoint Secret</option>
+          </select>
+          <select id="flagFilter">
+            <option value="all">All rows</option>
+            <option value="review">Human review required</option>
+            <option value="validation">Validation failed</option>
+            <option value="changed">Severity changed</option>
+          </select>
+          <select id="reviewFilter">
+            <option value="all">All decisions</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="override">Override</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Scanner</th>
+                <th>Row</th>
+                <th>Finding</th>
+                <th>Original</th>
+                <th>Residual</th>
+                <th>Asset</th>
+                <th>Remediation / control</th>
+                <th>Flag</th>
+                <th>Review</th>
+              </tr>
+            </thead>
+            <tbody id="findingsBody"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="emptyState" hidden>No findings match the current filters.</div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+const initialJobs = [
+  {
+    id: "build-92619",
+    project: "ap2065",
+    priority: "high",
+    scanner: "mixed",
+    status: "completed",
+    branch: "release/payment-api",
+    commit: "8d73c1a",
+    artifactUrl: "https://ci.example/artifacts/build-92619/report.xlsx",
+    createdAt: "2026-06-30 09:12",
+    outputXlsx: "/data/jobs/build-92619/annotated.xlsx",
+    outputMd: "/data/jobs/build-92619/summary.md",
+    summary: "361 findings reviewed across Black Duck, Coverity, Checkpoint CVE, and Checkpoint Secret. Critical and High findings remain human-gated when severity changes or validation fails.",
+    findings: [
+      {
+        scanner: "Black Duck",
+        rowId: 42,
+        finding: "Apache Tomcat CVE-2025-66614",
+        component: "tomcat-embed-core 10.1.20",
+        originalSeverity: "Critical",
+        residualSeverity: "Critical",
+        assetImportance: "High",
+        control: "Upgrade tomcat-embed-core to 10.1.56. Keep external Tomcat endpoints restricted by network ACL until the upgrade is deployed.",
+        flag: "None",
+        reviewStatus: "approved",
+        reviewerNote: "Matches upgrade path from scanner output."
+      },
+      {
+        scanner: "Checkpoint Secret",
+        rowId: 18,
+        finding: "Production credentials in application-prod.yml",
+        component: "Spring Boot JAR",
+        originalSeverity: "High",
+        residualSeverity: "Critical",
+        assetImportance: "High",
+        control: "Confirm whether values are live credentials. If confirmed, rotate within 24 hours and replace file-based secrets with runtime secret manager injection.",
+        flag: "Severity changed",
+        reviewStatus: "pending",
+        reviewerNote: ""
+      },
+      {
+        scanner: "Coverity",
+        rowId: 9,
+        finding: "Container running as root",
+        component: "Dockerfile",
+        originalSeverity: "High",
+        residualSeverity: "High",
+        assetImportance: "High",
+        control: "Add a non-root USER directive to the Dockerfile and include the change in the current sprint container rebuild.",
+        flag: "None",
+        reviewStatus: "pending",
+        reviewerNote: ""
+      },
+      {
+        scanner: "Checkpoint CVE",
+        rowId: 77,
+        finding: "OpenSSL package CVE-2025-15467",
+        component: "libssl3 3.3.1-r0",
+        originalSeverity: "High",
+        residualSeverity: "Critical",
+        assetImportance: "High",
+        control: "Rebuild the container image using a base image that includes libssl3 and libcrypto3 3.3.6-r0 or newer.",
+        flag: "Severity changed",
+        reviewStatus: "pending",
+        reviewerNote: ""
+      },
+      {
+        scanner: "Black Duck",
+        rowId: 101,
+        finding: "requests CVE with fixed version",
+        component: "requests 2.30.0",
+        originalSeverity: "Medium",
+        residualSeverity: "Medium",
+        assetImportance: "Low",
+        control: "Upgrade requests to 2.32.4. Python projects can apply `python -m pip install --upgrade 'requests==2.32.4'` and update the lock file.",
+        flag: "None",
+        reviewStatus: "approved",
+        reviewerNote: "Concrete remediation command is present."
+      },
+      {
+        scanner: "Coverity",
+        rowId: 33,
+        finding: "Missing remediation text",
+        component: "src/auth/session.py",
+        originalSeverity: "Medium",
+        residualSeverity: "Info",
+        assetImportance: "Low",
+        control: "VALIDATION_FAILED",
+        flag: "Validation failed",
+        reviewStatus: "pending",
+        reviewerNote: ""
+      }
+    ]
+  },
+  {
+    id: "build-92701",
+    project: "ap2252",
+    priority: "low",
+    scanner: "blackduck",
+    status: "running",
+    branch: "develop",
+    commit: "2a8fd11",
+    artifactUrl: "https://ci.example/artifacts/build-92701/report.xlsx",
+    createdAt: "2026-06-30 10:30",
+    outputXlsx: "",
+    outputMd: "",
+    summary: "Review is running. Findings will appear when structural validation completes.",
+    findings: []
+  }
+];
+
+let jobs = JSON.parse(JSON.stringify(initialJobs));
+let selectedJobId = jobs[0].id;
+let apiOnline = false;
+const API_BASE = window.location.protocol.startsWith("http") ? window.location.origin : "http://127.0.0.1:8088";
+
+const el = {
+  metrics: document.getElementById("metrics"),
+  selectedJobLabel: document.getElementById("selectedJobLabel"),
+  jobList: document.getElementById("jobList"),
+  jobSummary: document.getElementById("jobSummary"),
+  jobDetailSubtitle: document.getElementById("jobDetailSubtitle"),
+  findingsBody: document.getElementById("findingsBody"),
+  findingCount: document.getElementById("findingCount"),
+  emptyState: document.getElementById("emptyState"),
+  searchInput: document.getElementById("searchInput"),
+  severityFilter: document.getElementById("severityFilter"),
+  scannerFilter: document.getElementById("scannerFilter"),
+  flagFilter: document.getElementById("flagFilter"),
+  reviewFilter: document.getElementById("reviewFilter"),
+  reviewForm: document.getElementById("reviewForm"),
+  formError: document.getElementById("formError"),
+  artifactUrl: document.getElementById("artifactUrl"),
+  projectCode: document.getElementById("projectCode"),
+  priority: document.getElementById("priority"),
+  scanner: document.getElementById("scanner"),
+  buildId: document.getElementById("buildId"),
+  reviewerNote: document.getElementById("reviewerNote"),
+  downloadXlsx: document.getElementById("downloadXlsx"),
+  downloadMd: document.getElementById("downloadMd"),
+  serviceHealth: document.getElementById("serviceHealth"),
+  runDemoButton: document.getElementById("runDemoButton"),
+  resetDemoButton: document.getElementById("resetDemoButton"),
+  refreshJobsButton: document.getElementById("refreshJobsButton")
+};
+
+function setHealth(online, message) {
+  apiOnline = online;
+  el.serviceHealth.classList.toggle("offline", !online);
+  el.serviceHealth.querySelector("span:last-child").textContent = message;
+}
+
+function normalizeJob(apiJob) {
+  return {
+    id: apiJob.job_id,
+    project: apiJob.project || "unknown",
+    priority: apiJob.priority || "low",
+    scanner: apiJob.scanner || "mixed",
+    status: apiJob.status || "unknown",
+    branch: apiJob.branch || "demo",
+    commit: apiJob.commit || "demo",
+    artifactUrl: apiJob.artifact_url || "",
+    createdAt: apiJob.created_at || "demo agent",
+    outputXlsx: apiJob.output_xlsx || "",
+    outputMd: apiJob.output_md || "",
+    summary: `${apiJob.finding_count || 0} findings processed. ${apiJob.severity_review_rows || 0} severity review rows and ${apiJob.validation_failed_rows || 0} validation failures require attention.`,
+    findings: []
+  };
+}
+
+function normalizeFinding(apiFinding) {
+  return {
+    scanner: apiFinding.scanner || "Unknown",
+    rowId: apiFinding.row_id,
+    finding: apiFinding.finding || "Unknown finding",
+    component: apiFinding.component || "",
+    originalSeverity: apiFinding.original_severity || "Info",
+    residualSeverity: apiFinding.residual_severity || "Info",
+    assetImportance: apiFinding.asset_importance || "Low",
+    control: apiFinding.compensation_control || "",
+    flag: apiFinding.flag || "None",
+    reviewStatus: apiFinding.review_status || "pending",
+    reviewerNote: apiFinding.reviewer_note || ""
+  };
+}
+
+async function apiFetch(path, options = {}) {
+  const response = await fetch(`${API_BASE}${path}`, options);
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+async function checkApiHealth() {
+  try {
+    await apiFetch("/healthz");
+    setHealth(true, "Demo agent online");
+    return true;
+  } catch (error) {
+    setHealth(false, "Fallback mock mode");
+    return false;
+  }
+}
+
+async function loadJobsFromApi(selectJobId = selectedJobId) {
+  const apiJobs = await apiFetch("/jobs");
+  if (!apiJobs.length) {
+    jobs = JSON.parse(JSON.stringify(initialJobs));
+    selectedJobId = jobs[0].id;
+    return;
+  }
+  jobs = apiJobs.map(normalizeJob);
+  selectedJobId = jobs.some((job) => job.id === selectJobId) ? selectJobId : jobs[0].id;
+  await loadFindingsForSelectedJob();
+}
+
+async function loadFindingsForSelectedJob() {
+  if (!apiOnline) return;
+  const job = selectedJob();
+  if (!job) return;
+  const apiFindings = await apiFetch(`/jobs/${encodeURIComponent(job.id)}/findings`);
+  job.findings = apiFindings.map(normalizeFinding);
+}
+
+function selectedJob() {
+  return jobs.find((job) => job.id === selectedJobId) || jobs[0];
+}
+
+function severityClass(value) {
+  return String(value || "info").toLowerCase();
+}
+
+function reviewRequiredCount(job) {
+  return job.findings.filter((finding) => finding.reviewStatus === "pending" || finding.flag !== "None").length;
+}
+
+function validationFailedCount(job) {
+  return job.findings.filter((finding) => finding.flag === "Validation failed" || finding.control === "VALIDATION_FAILED").length;
+}
+
+function severityChanged(finding) {
+  return finding.originalSeverity !== finding.residualSeverity;
+}
+
+function renderMetrics() {
+  const job = selectedJob();
+  const total = job.findings.length;
+  const criticalHigh = job.findings.filter((finding) => ["Critical", "High"].includes(finding.residualSeverity)).length;
+  const pending = job.findings.filter((finding) => finding.reviewStatus === "pending").length;
+  const failed = validationFailedCount(job);
+  const metrics = [
+    ["Total findings", total, `${job.scanner} source`],
+    ["Critical / High", criticalHigh, "Draft residual severity"],
+    ["Human review", pending, `${reviewRequiredCount(job)} rows need attention`],
+    ["Validation failed", failed, "Must be fixed before final export"]
+  ];
+  el.metrics.innerHTML = metrics.map(([label, value, note]) => `
+    <div class="metric">
+      <div class="metric-label">${label}</div>
+      <div class="metric-value">${value}</div>
+      <div class="metric-note">${note}</div>
+    </div>
+  `).join("");
+}
+
+function renderJobs() {
+  el.jobList.innerHTML = jobs.map((job) => `
+    <button class="job ${job.id === selectedJobId ? "selected" : ""}" type="button" data-job-id="${job.id}">
+      <span>
+        <span class="job-title">${job.id}</span>
+        <span class="job-meta">${job.project} | ${job.branch || "no branch"} | ${job.createdAt}</span>
+      </span>
+      <span class="badge ${job.status}">${job.status}</span>
+    </button>
+  `).join("");
+
+  document.querySelectorAll("[data-job-id]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      selectedJobId = button.dataset.jobId;
+      if (apiOnline) {
+        try {
+          await loadFindingsForSelectedJob();
+        } catch (error) {
+          setHealth(false, "Fallback mock mode");
+        }
+      }
+      renderAll();
+    });
+  });
+}
+
+function renderJobDetail() {
+  const job = selectedJob();
+  el.selectedJobLabel.textContent = job.id;
+  el.jobDetailSubtitle.textContent = `${job.project} | ${job.priority} priority | ${job.artifactUrl}`;
+  el.jobSummary.innerHTML = `
+    <h3>${job.id} <span class="badge ${job.status}">${job.status}</span></h3>
+    <p>${job.summary}</p>
+    <p><strong>Outputs:</strong> ${job.outputXlsx || "pending"} | ${job.outputMd || "pending"}</p>
+    <p><strong>Review gate:</strong> ${reviewRequiredCount(job)} rows require reviewer attention; ${validationFailedCount(job)} validation failures.</p>
+  `;
+}
+
+function findingMatchesFilters(finding) {
+  const query = el.searchInput.value.trim().toLowerCase();
+  const haystack = [
+    finding.scanner,
+    finding.rowId,
+    finding.finding,
+    finding.component,
+    finding.control,
+    finding.flag,
+    finding.reviewerNote
+  ].join(" ").toLowerCase();
+  if (query && !haystack.includes(query)) return false;
+  if (el.severityFilter.value !== "all" && finding.residualSeverity !== el.severityFilter.value) return false;
+  if (el.scannerFilter.value !== "all" && finding.scanner !== el.scannerFilter.value) return false;
+  if (el.reviewFilter.value !== "all" && finding.reviewStatus !== el.reviewFilter.value) return false;
+  if (el.flagFilter.value === "review" && !(finding.reviewStatus === "pending" || finding.flag !== "None")) return false;
+  if (el.flagFilter.value === "validation" && finding.flag !== "Validation failed") return false;
+  if (el.flagFilter.value === "changed" && !severityChanged(finding)) return false;
+  return true;
+}
+
+function renderFindings() {
+  const job = selectedJob();
+  const filtered = job.findings.filter(findingMatchesFilters);
+  el.findingCount.textContent = `${filtered.length} of ${job.findings.length} rows`;
+  el.emptyState.hidden = filtered.length > 0;
+  el.findingsBody.innerHTML = filtered.map((finding) => `
+    <tr>
+      <td>${finding.scanner}</td>
+      <td>${finding.rowId}</td>
+      <td>
+        <div class="finding-name">${finding.finding}</div>
+        <div class="muted">${finding.component}</div>
+      </td>
+      <td><span class="badge ${severityClass(finding.originalSeverity)}">${finding.originalSeverity}</span></td>
+      <td><span class="badge ${severityClass(finding.residualSeverity)}">${finding.residualSeverity}</span></td>
+      <td>${finding.assetImportance}</td>
+      <td class="control">${finding.control}</td>
+      <td><span class="badge ${finding.flag === "None" ? "info" : "review"}">${finding.flag}</span></td>
+      <td class="actions">
+        <div class="btn-row">
+          <span class="badge ${finding.reviewStatus}">${finding.reviewStatus}</span>
+          <button class="btn small" type="button" data-approve-row="${finding.rowId}">Approve</button>
+          <button class="btn small danger" type="button" data-override-row="${finding.rowId}">Override</button>
+        </div>
+        <div class="muted">${finding.reviewerNote || "No reviewer note"}</div>
+      </td>
+    </tr>
+  `).join("");
+
+  document.querySelectorAll("[data-approve-row]").forEach((button) => {
+    button.addEventListener("click", () => updateReviewStatus(Number(button.dataset.approveRow), "approved"));
+  });
+  document.querySelectorAll("[data-override-row]").forEach((button) => {
+    button.addEventListener("click", () => updateReviewStatus(Number(button.dataset.overrideRow), "override"));
+  });
+}
+
+async function updateReviewStatus(rowId, status) {
+  const job = selectedJob();
+  const finding = job.findings.find((item) => item.rowId === rowId);
+  if (!finding) return;
+  const reviewerNote = status === "override"
+    ? "Reviewer override recorded. Downloaded report updated."
+    : "Reviewer approved draft decision. Downloaded report updated.";
+  if (apiOnline) {
+    try {
+      await apiFetch(`/jobs/${encodeURIComponent(job.id)}/reviews`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          row_id: rowId,
+          review_status: status,
+          reviewer_note: reviewerNote
+        })
+      });
+      await loadJobsFromApi(job.id);
+      renderAll();
+      return;
+    } catch (error) {
+      el.formError.textContent = `Review update failed: ${error.message}`;
+      el.formError.classList.add("visible");
+    }
+  }
+  finding.reviewStatus = status;
+  finding.reviewerNote = reviewerNote;
+  renderAll();
+}
+
+async function createReviewJob(event) {
+  event.preventDefault();
+  const artifactUrl = el.artifactUrl.value.trim();
+  const buildId = el.buildId.value.trim() || `build-${Math.floor(93000 + Math.random() * 1000)}`;
+  if (!artifactUrl && !buildId) {
+    el.formError.classList.add("visible");
+    return;
+  }
+  el.formError.classList.remove("visible");
+  const payload = {
+    job_id: buildId,
+    project: el.projectCode.value.trim() || "unknown",
+    priority: el.priority.value,
+    scanner: el.scanner.value,
+    artifact_url: artifactUrl || "demo://manual-ui"
+  };
+
+  if (await checkApiHealth()) {
+    try {
+      const apiJob = await apiFetch("/webhooks/scan-finished", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+      });
+      await loadJobsFromApi(apiJob.job_id);
+      renderAll();
+      return;
+    } catch (error) {
+      el.formError.textContent = `Demo agent rejected the job: ${error.message}`;
+      el.formError.classList.add("visible");
+      return;
+    }
+  }
+
+  const newJob = {
+    id: payload.job_id,
+    project: payload.project,
+    priority: payload.priority,
+    scanner: payload.scanner,
+    status: "queued",
+    branch: "manual-ui",
+    commit: "pending",
+    artifactUrl: payload.artifact_url,
+    createdAt: new Date().toISOString().slice(0, 16).replace("T", " "),
+    outputXlsx: "",
+    outputMd: "",
+    summary: "Job queued in fallback mock mode. Start demo_agent.py to create real demo outputs.",
+    findings: []
+  };
+  jobs.unshift(newJob);
+  selectedJobId = newJob.id;
+  renderAll();
+}
+
+async function runDemoJob() {
+  el.formError.classList.remove("visible");
+  const payload = {
+    job_id: "build-92619",
+    project: "ap2065",
+    priority: "high",
+    scanner: "mixed",
+    artifact_url: "https://ci.example/artifacts/report.xlsx"
+  };
+  if (!(await checkApiHealth())) {
+    selectedJobId = "build-92619";
+    jobs = JSON.parse(JSON.stringify(initialJobs));
+    renderAll();
+    return;
+  }
+  const apiJob = await apiFetch("/webhooks/scan-finished", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload)
+  });
+  await loadJobsFromApi(apiJob.job_id);
+  renderAll();
+}
+
+async function resetDemo() {
+  el.formError.classList.remove("visible");
+  if (!(await checkApiHealth())) {
+    jobs = JSON.parse(JSON.stringify(initialJobs));
+    selectedJobId = "build-92619";
+    renderAll();
+    return;
+  }
+  const apiJob = await apiFetch("/demo/reset", {method: "POST"});
+  await loadJobsFromApi(apiJob.job_id);
+  renderAll();
+}
+
+async function refreshJobs() {
+  if (!(await checkApiHealth())) {
+    renderAll();
+    return;
+  }
+  await loadJobsFromApi();
+  renderAll();
+}
+
+function loadSampleArtifact() {
+  el.artifactUrl.value = "https://ci.example/artifacts/build-92619/report.xlsx";
+  el.projectCode.value = "ap2065";
+  el.priority.value = "high";
+  el.scanner.value = "mixed";
+  el.buildId.value = "build-92619-copy";
+}
+
+function downloadPlaceholder(kind) {
+  const job = selectedJob();
+  if (apiOnline && job.status === "completed") {
+    const file = kind === "xlsx" ? "annotated.xlsx" : "summary.md";
+    window.open(`${API_BASE}/jobs/${encodeURIComponent(job.id)}/outputs/${file}`, "_blank");
+    return;
+  }
+  const path = kind === "xlsx" ? job.outputXlsx : job.outputMd;
+  alert(path ? `Start demo_agent.py and refresh jobs to download: ${path}` : "Output is not ready for this job.");
+}
+
+function renderAll() {
+  renderMetrics();
+  renderJobs();
+  renderJobDetail();
+  renderFindings();
+}
+
+["input", "change"].forEach((eventName) => {
+  [el.searchInput, el.severityFilter, el.scannerFilter, el.flagFilter, el.reviewFilter].forEach((control) => {
+    control.addEventListener(eventName, renderFindings);
+  });
+});
+
+el.reviewForm.addEventListener("submit", createReviewJob);
+document.getElementById("loadSampleButton").addEventListener("click", loadSampleArtifact);
+document.getElementById("resetMockButton").addEventListener("click", () => {
+  jobs = JSON.parse(JSON.stringify(initialJobs));
+  selectedJobId = jobs[0].id;
+  setHealth(false, "Fallback mock mode");
+  renderAll();
+});
+el.runDemoButton.addEventListener("click", runDemoJob);
+el.resetDemoButton.addEventListener("click", resetDemo);
+el.refreshJobsButton.addEventListener("click", refreshJobs);
+el.downloadXlsx.addEventListener("click", () => downloadPlaceholder("xlsx"));
+el.downloadMd.addEventListener("click", () => downloadPlaceholder("md"));
+
+async function init() {
+  if (await checkApiHealth()) {
+    try {
+      await loadJobsFromApi();
+    } catch (error) {
+      setHealth(false, "Fallback mock mode");
+    }
+  }
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
