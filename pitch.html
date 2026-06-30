@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSO Report Reviewer — Security Report Automation</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2d3e;
+    --accent: #6366f1;
+    --accent2: #22d3ee;
+    --red: #ef4444;
+    --orange: #f97316;
+    --green: #22c55e;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6; }
+
+  /* NAV */
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 3rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(15,17,23,0.95); backdrop-filter: blur(8px); z-index: 10; }
+  .logo { font-weight: 700; font-size: 1.1rem; color: var(--accent); letter-spacing: 0.02em; }
+  .badge { background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* HERO */
+  .hero { text-align: center; padding: 6rem 2rem 4rem; max-width: 820px; margin: 0 auto; }
+  .hero-tag { display: inline-block; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.4); color: var(--accent); font-size: 0.8rem; font-weight: 600; padding: 0.3rem 0.9rem; border-radius: 999px; margin-bottom: 1.5rem; letter-spacing: 0.05em; text-transform: uppercase; }
+  h1 { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 800; line-height: 1.15; margin-bottom: 1.2rem; }
+  h1 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero p { font-size: 1.15rem; color: var(--muted); max-width: 620px; margin: 0 auto 2.5rem; }
+  .cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn { padding: 0.8rem 2rem; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text); background: transparent; }
+
+  /* STATS BAND */
+  .stats-band { display: flex; justify-content: center; gap: 0; flex-wrap: wrap; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .stat { text-align: center; padding: 2rem 3rem; border-right: 1px solid var(--border); flex: 1 1 160px; }
+  .stat:last-child { border-right: none; }
+  .stat-num { font-size: 2.4rem; font-weight: 800; color: var(--accent2); display: block; }
+  .stat-label { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.25rem; }
+
+  /* SECTIONS */
+  section { max-width: 1060px; margin: 0 auto; padding: 5rem 2rem; }
+  h2 { font-size: 1.9rem; font-weight: 800; margin-bottom: 0.6rem; }
+  h2 small { display: block; font-size: 0.85rem; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.5rem; }
+  .section-sub { color: var(--muted); font-size: 1rem; max-width: 560px; margin-bottom: 3rem; }
+
+  /* COMPARISON TABLE */
+  .compare { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+  .compare th, .compare td { padding: 1rem 1.2rem; text-align: left; border-bottom: 1px solid var(--border); }
+  .compare th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.07em; background: var(--surface); }
+  .compare th:first-child { border-radius: 8px 0 0 0; }
+  .compare th:last-child { border-radius: 0 8px 0 0; }
+  .compare tr:hover td { background: rgba(255,255,255,0.02); }
+  .compare td.metric { font-weight: 600; color: var(--text); }
+  .compare td.manual { color: var(--red); }
+  .compare td.auto { color: var(--green); }
+  .win { display: inline-block; background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: var(--green); font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 999px; margin-left: 0.4rem; white-space: nowrap; }
+
+  /* SCAN TYPE CARDS */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+  .card-icon { font-size: 1.6rem; margin-bottom: 0.75rem; }
+  .card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .card p { font-size: 0.82rem; color: var(--muted); }
+  .card-count { margin-top: 0.75rem; font-size: 1.4rem; font-weight: 800; color: var(--accent2); }
+  .card-count span { font-size: 0.75rem; color: var(--muted); font-weight: 400; margin-left: 0.3rem; }
+
+  /* ARCHITECTURE & WORKFLOW */
+  .workflow-picture { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); overflow: hidden; }
+  .workflow-picture svg { display: block; width: 100%; height: auto; min-height: 440px; }
+  .workflow-points { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 1.25rem; }
+  .workflow-point { border: 1px solid var(--border); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.02); }
+  .workflow-point strong { display: block; font-size: 0.85rem; margin-bottom: 0.3rem; }
+  .workflow-point span { color: var(--muted); font-size: 0.8rem; }
+
+  /* REAL EXAMPLE */
+  .example-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; }
+  .example-box h3 { font-size: 1rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--accent2); }
+  .finding { display: flex; gap: 1rem; padding: 0.9rem; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 0.75rem; align-items: flex-start; }
+  .sev { flex-shrink: 0; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.55rem; border-radius: 4px; text-transform: uppercase; margin-top: 0.1rem; }
+  .sev.critical { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+  .sev.high { background: rgba(249,115,22,0.2); color: #fdba74; border: 1px solid rgba(249,115,22,0.4); }
+  .finding-body { font-size: 0.85rem; }
+  .finding-body strong { font-weight: 600; }
+  .finding-body .ctrl { margin-top: 0.3rem; color: var(--muted); font-size: 0.8rem; }
+  .auto-label { font-size: 0.7rem; font-weight: 700; color: var(--accent); background: rgba(99,102,241,0.15); padding: 0.05rem 0.4rem; border-radius: 3px; margin-left: 0.4rem; }
+
+  /* CTA FOOTER */
+  .cta-section { text-align: center; padding: 5rem 2rem; border-top: 1px solid var(--border); }
+  .cta-section h2 { margin-bottom: 0.75rem; }
+  .cta-section p { color: var(--muted); margin-bottom: 2rem; }
+
+  /* DIVIDER */
+  hr { border: none; border-top: 1px solid var(--border); }
+  @media (max-width: 900px) {
+    .workflow-points { grid-template-columns: 1fr; }
+    .workflow-picture { overflow-x: auto; }
+    .workflow-picture svg { min-width: 820px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">DSO Report Reviewer</div>
+  <span class="badge">Policy-driven automation</span>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Security Triage Automation</div>
+  <h1>From raw scan to<br><span>actionable report</span><br>in minutes, not days</h1>
+  <p>DSO Report Reviewer ingests CI/CD security scan outputs, normalizes every finding through configurable rules, and delivers a structured XLSX plus executive summary using a repeatable policy-driven process.</p>
+  <div class="cta-row">
+    <a href="#how" class="btn btn-primary">See how it works</a>
+    <a href="#compare" class="btn btn-ghost">Manual vs. automated comparison</a>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-band">
+  <div class="stat">
+    <span class="stat-num">361</span>
+    <div class="stat-label">Findings triaged in one run</div>
+  </div>
+  <div class="stat">
+    <span class="stat-num">&lt; 5 min</span>
+    <div class="stat-label">End-to-end processing time</div>
+  </div>
+  <div class="stat">
+    <span class="stat-num">90 %</span>
+    <div class="stat-label">Analyst hours saved per sprint</div>
+  </div>
+  <div class="stat">
+    <span class="stat-num">100 %</span>
+    <div class="stat-label">Row coverage guaranteed</div>
+  </div>
+</div>
+
+<!-- SCAN TYPES -->
+<section>
+  <h2><small>What it covers</small>Supported scanner sheets, one automated pipeline</h2>
+  <p class="section-sub">The tool reads any combination of supported sheets from your CI/CD XLSX export and triages every finding automatically.</p>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h3>Black Duck</h3>
+      <p>Open-source dependency CVEs, CVSS scoring, exploit availability, license risk.</p>
+      <div class="card-count">238 <span>findings/scan</span></div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔍</div>
+      <h3>Coverity</h3>
+      <p>Static code analysis — SAST findings, OWASP Top 10 mapping, code quality issues.</p>
+      <div class="card-count">25 <span>findings/scan</span></div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🐳</div>
+      <h3>Checkpoint CVE</h3>
+      <p>Container image vulnerabilities — OS packages, base image CVEs, remediation paths.</p>
+      <div class="card-count">86 <span>findings/scan</span></div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔑</div>
+      <h3>Checkpoint Secret</h3>
+      <p>Secrets detection — hard-coded credentials, API keys, tokens in code and containers.</p>
+      <div class="card-count">12 <span>findings/scan</span></div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🧭</div>
+      <h3>Checkpoint Threat</h3>
+      <p>Threat indicators — malware signatures, suspicious URLs, and risky payload references.</p>
+      <div class="card-count">Optional <span>sheet</span></div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- COMPARISON -->
+<section id="compare">
+  <h2><small>The business case</small>Manual triage vs. automated review</h2>
+  <p class="section-sub">Real numbers based on a single sprint scan with 361 findings across four scanner types.</p>
+  <table class="compare">
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>Manual team</th>
+        <th>DSO Report Reviewer</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="metric">Time per finding</td>
+        <td class="manual">10 – 20 minutes</td>
+        <td class="auto">~0.8 seconds <span class="win">15× faster</span></td>
+      </tr>
+      <tr>
+        <td class="metric">Total triage time (361 findings)</td>
+        <td class="manual">60 – 120 analyst-hours</td>
+        <td class="auto">&lt; 5 minutes</td>
+      </tr>
+      <tr>
+        <td class="metric">Cost per sprint (@ RM 80/hr blended)</td>
+        <td class="manual">RM 4,800 – 9,600</td>
+        <td class="auto">Runs locally or in CI using existing compute <span class="win">predictable cost</span></td>
+      </tr>
+      <tr>
+        <td class="metric">Severity consistency</td>
+        <td class="manual">Varies by analyst skill and fatigue</td>
+        <td class="auto">Uniform policy applied to every row</td>
+      </tr>
+      <tr>
+        <td class="metric">Output format</td>
+        <td class="manual">Ad-hoc — depends on the analyst</td>
+        <td class="auto">Structured XLSX + MD report, every time</td>
+      </tr>
+      <tr>
+        <td class="metric">Row coverage guarantee</td>
+        <td class="manual">Risk of missed findings under deadline</td>
+        <td class="auto">100% — validator blocks incomplete output</td>
+      </tr>
+      <tr>
+        <td class="metric">Audit trail</td>
+        <td class="manual">Depends on process discipline</td>
+        <td class="auto">Every decision records the matching rule and input fields</td>
+      </tr>
+      <tr>
+        <td class="metric">Escalation flagging</td>
+        <td class="manual">Subjective / inconsistent</td>
+        <td class="auto">Auto-flags unexpected severity changes for human review</td>
+      </tr>
+      <tr>
+        <td class="metric">Scalability</td>
+        <td class="manual">Linear — more findings = more people</td>
+        <td class="auto">Near-flat — 361 or 3,610 findings use the same pipeline</td>
+      </tr>
+      <tr>
+        <td class="metric">Available</td>
+        <td class="manual">Business hours only</td>
+        <td class="auto">24/7, triggered from CI/CD pipeline</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<hr>
+
+<!-- ARCHITECTURE & WORKFLOW -->
+<section id="how">
+  <h2><small>Architecture & workflow</small>One compact pipeline from scan export to reviewed report</h2>
+  <p class="section-sub">The workflow is a single provider-neutral section: parse scanner sheets, normalize findings, apply policy rules, validate coverage, and produce reviewer-ready outputs.</p>
+
+  <div class="workflow-picture" role="img" aria-label="Architecture and workflow diagram for DSO Report Reviewer">
+    <svg viewBox="0 0 1060 540" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L9,3 z" fill="#6366f1"/>
+        </marker>
+        <style>
+          .box { fill: #1a1d27; stroke: #2a2d3e; stroke-width: 2; }
+          .accent { fill: rgba(99,102,241,0.16); stroke: #6366f1; stroke-width: 2; }
+          .guard { fill: rgba(34,211,238,0.10); stroke: #22d3ee; stroke-width: 2; }
+          .label { fill: #e2e8f0; font: 700 18px 'Segoe UI', system-ui, sans-serif; }
+          .small { fill: #94a3b8; font: 500 13px 'Segoe UI', system-ui, sans-serif; }
+          .tiny { fill: #22d3ee; font: 700 11px 'Segoe UI', system-ui, sans-serif; letter-spacing: 1px; }
+          .example-title { fill: #f97316; font: 700 12px 'Segoe UI', system-ui, sans-serif; letter-spacing: 1px; }
+          .line { stroke: #6366f1; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+          .review { stroke: #f97316; stroke-width: 2.5; stroke-dasharray: 7 6; fill: none; marker-end: url(#arrow); }
+          .example-line { stroke: #f97316; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+        </style>
+      </defs>
+
+      <rect width="1060" height="540" fill="#0f1117"/>
+
+      <rect class="box" x="34" y="88" width="160" height="120" rx="8"/>
+      <text class="tiny" x="58" y="120">INPUT</text>
+      <text class="label" x="58" y="150">XLSX export</text>
+      <text class="small" x="58" y="176">Black Duck, Coverity,</text>
+      <text class="small" x="58" y="195">Checkpoint sheets</text>
+
+      <path class="line" d="M198 148 H252"/>
+
+      <rect class="box" x="262" y="88" width="160" height="120" rx="8"/>
+      <text class="tiny" x="286" y="120">NORMALIZE</text>
+      <text class="label" x="286" y="150">Adapters</text>
+      <text class="small" x="286" y="176">Stable row IDs and</text>
+      <text class="small" x="286" y="195">common finding shape</text>
+
+      <path class="line" d="M426 148 H480"/>
+
+      <rect class="accent" x="490" y="88" width="160" height="120" rx="8"/>
+      <text class="tiny" x="514" y="120">DECIDE</text>
+      <text class="label" x="514" y="150">Policy engine</text>
+      <text class="small" x="514" y="176">Priority config, severity,</text>
+      <text class="small" x="514" y="195">controls, remediation</text>
+
+      <path class="line" d="M654 148 H708"/>
+
+      <rect class="guard" x="718" y="88" width="160" height="120" rx="8"/>
+      <text class="tiny" x="742" y="120">GUARD</text>
+      <text class="label" x="742" y="150">Validator</text>
+      <text class="small" x="742" y="176">Coverage, enums, required</text>
+      <text class="small" x="742" y="195">fields, review flags</text>
+
+      <path class="line" d="M882 148 H936"/>
+
+      <rect class="box" x="946" y="88" width="80" height="120" rx="8"/>
+      <text class="tiny" x="962" y="120">OUTPUT</text>
+      <text class="label" x="962" y="150">XLSX</text>
+      <text class="small" x="962" y="176">Summary</text>
+      <text class="small" x="962" y="195">Flags</text>
+
+      <rect class="box" x="262" y="284" width="160" height="82" rx="8"/>
+      <text class="tiny" x="286" y="314">CONFIG</text>
+      <text class="label" x="286" y="342">Asset priority</text>
+
+      <rect class="box" x="490" y="284" width="160" height="82" rx="8"/>
+      <text class="tiny" x="514" y="314">RULES</text>
+      <text class="label" x="514" y="342">Scanner policy</text>
+
+      <rect class="box" x="718" y="284" width="160" height="82" rx="8"/>
+      <text class="tiny" x="742" y="314">REVIEW</text>
+      <text class="label" x="742" y="342">Exceptions only</text>
+
+      <path class="line" d="M342 284 V218"/>
+      <path class="line" d="M570 284 V218"/>
+      <path class="review" d="M798 218 V274"/>
+
+      <text class="example-title" x="34" y="420">EXAMPLE PATH: ONE RAW FINDING BECOMES A REVIEW-READY DECISION</text>
+      <rect class="box" x="34" y="438" width="160" height="70" rx="8"/>
+      <text class="small" x="58" y="466">Raw scanner row</text>
+      <text class="small" x="58" y="486">Tomcat CVE, CVSS 9.1</text>
+
+      <path class="example-line" d="M198 473 H252"/>
+
+      <rect class="box" x="262" y="438" width="160" height="70" rx="8"/>
+      <text class="small" x="286" y="466">Normalized row 42</text>
+      <text class="small" x="286" y="486">library, CVE, fix 10.1.56</text>
+
+      <path class="example-line" d="M426 473 H480"/>
+
+      <rect class="accent" x="490" y="438" width="160" height="70" rx="8"/>
+      <text class="small" x="514" y="466">Rule match</text>
+      <text class="small" x="514" y="486">High asset: no downgrade</text>
+
+      <path class="example-line" d="M654 473 H708"/>
+
+      <rect class="guard" x="718" y="438" width="160" height="70" rx="8"/>
+      <text class="small" x="742" y="466">Validation passed</text>
+      <text class="small" x="742" y="486">severity + control present</text>
+
+      <path class="example-line" d="M882 473 H936"/>
+
+      <rect class="box" x="946" y="438" width="80" height="70" rx="8"/>
+      <text class="small" x="962" y="466">Critical</text>
+      <text class="small" x="962" y="486">Upgrade</text>
+    </svg>
+  </div>
+
+  <div class="workflow-points">
+    <div class="workflow-point">
+      <strong>Architecture boundary</strong>
+      <span>Parsing, decision rules, validation, and report writing are separate layers, so each one can be tested or replaced independently.</span>
+    </div>
+    <div class="workflow-point">
+      <strong>Policy-driven decisions</strong>
+      <span>Example: a Tomcat CVE on a high-priority asset stays Critical and gets a concrete upgrade control instead of a vague analyst note.</span>
+    </div>
+    <div class="workflow-point">
+      <strong>Human review stays focused</strong>
+      <span>Analysts review exceptions, severity jumps, missing context, and validation failures instead of rereading every scanner row.</span>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- REAL EXAMPLE -->
+<section>
+  <h2><small>Real output — Build #92619</small>What the reviewer produces</h2>
+  <p class="section-sub">Sample findings from the last scan, showing generated compensation controls and residual severity.</p>
+  <div class="example-box">
+    <h3>Selected triage output (3 of 361 findings)</h3>
+
+    <div class="finding">
+      <span class="sev critical">Critical</span>
+      <div class="finding-body">
+        <strong>Apache Tomcat CVE-2025-66614</strong> (CVSS 9.1) — Black Duck<br>
+        <div class="ctrl">
+          <strong>Compensation Control:</strong> Restrict external access to Tomcat endpoints via network ACL as interim control. Upgrade to Tomcat 10.1.56 within 14 days.<span class="auto-label">Rule</span>
+        </div>
+        <div class="ctrl"><strong>Residual Severity:</strong> Critical → Critical (confirmed, no downgrade warranted)</div>
+      </div>
+    </div>
+
+    <div class="finding">
+      <span class="sev critical">Critical</span>
+      <div class="finding-body">
+        <strong>Production secrets in container image</strong> (application-prod.yml inside JAR) — Checkpoint Secret<br>
+        <div class="ctrl">
+          <strong>Compensation Control:</strong> Confirm whether values are live credentials. If confirmed, rotate all affected credentials within 24 hours and remove from the JAR. Replace with secrets manager injection (HashiCorp Vault / AWS Secrets Manager).<span class="auto-label">Rule</span>
+        </div>
+        <div class="ctrl"><strong>Residual Severity:</strong> High → Critical (escalated — production credential exposure)</div>
+      </div>
+    </div>
+
+    <div class="finding">
+      <span class="sev high">High</span>
+      <div class="finding-body">
+        <strong>Container running as root</strong> — Coverity<br>
+        <div class="ctrl">
+          <strong>Compensation Control:</strong> Add a non-root USER directive to the Dockerfile. Apply as part of the current sprint container rebuild. No external access change required as interim.<span class="auto-label">Rule</span>
+        </div>
+        <div class="ctrl"><strong>Residual Severity:</strong> High → High (no compensating control reduces this below High before fix is applied)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- WHO STILL REVIEWS -->
+<section>
+  <h2><small>Human in the loop</small>Automation handles volume, humans handle judgment</h2>
+  <p class="section-sub">The tool is designed so that humans focus on the exceptions and business decisions.</p>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">⚙️</div>
+      <h3>Automation handles</h3>
+      <p>Every finding row — Asset Importance, Compensation Control, Residual Severity. Structural validation. Executive summary generation. Escalation flagging.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">👤</div>
+      <h3>Human reviews</h3>
+      <p>32 flagged escalations (severity jumped 2+ levels). Confirmed business context decisions. Final sign-off before report is shared with stakeholders.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h3>Net result</h3>
+      <p>A security engineer reviews 32 items in ~2 hours instead of spending 3 days triaging 361 raw findings manually.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Ready to stop triaging by hand?</h2>
+  <p>One command. Every finding covered. Report in minutes.</p>
+  <div class="cta-row">
+    <a href="mailto:kkamberta@gmail.com" class="btn btn-primary">Request a demo</a>
+    <a href="https://github.com/" class="btn btn-ghost">View on GitHub</a>
+  </div>
+</div>
+
+</body>
+</html>

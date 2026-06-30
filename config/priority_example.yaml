@@ -1,0 +1,15 @@
+# DSO Report Reviewer — project priority configuration
+#
+# Keys: app codes extracted from container image names / source paths (pattern: ap\d{4})
+#   Example image: harbordev.se.scb.co.th/ap2065-cbproduct/scbcbs-api:v2.7.25  → ap2065
+#   Example path:  /easyinvest-da-payment-service/src/...                        → ap1952
+#
+# Values: high | low
+#   high → Asset Importance = "High"; strict triage; no accepted-risk downgrades for Critical/High
+#   low  → Asset Importance = "Low";  accepted risk permissible for Medium/Low without public exploits
+#
+# Projects not listed here default to "low" (with a logged warning).
+
+ap2065: high    # cbproduct  — customer-facing payments
+ap2252: low     # ddg        — internal tooling
+ap1952: high    # easyinvest — customer-facing investments
