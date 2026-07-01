@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Agents - Relationship Pitch</title>
+<style>
+  :root {
+    --ink: #17202c;
+    --muted: #5f6f83;
+    --bg: #f5f7fb;
+    --paper: #ffffff;
+    --line: #d8e0ea;
+    --line-strong: #b8c5d5;
+    --blue: #2458d3;
+    --green: #177245;
+    --red: #b42318;
+    --amber: #a65f00;
+    --navy: #111827;
+    --shadow: 0 18px 45px rgba(17, 24, 39, 0.11);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+
+  .slide {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
+  .slide-head { margin-bottom: 20px; max-width: 900px; }
+  .slide-kicker { color: var(--blue); font-size: 0.78rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.06em; }
+  h1, h2 { line-height: 1.1; margin: 8px 0 10px; letter-spacing: 0; }
+  h1 { font-size: clamp(2rem, 4vw, 3.4rem); max-width: 940px; }
+  h2 { font-size: clamp(1.6rem, 3vw, 2.35rem); }
+  .slide-head p { color: var(--muted); margin: 0; font-size: 1rem; }
+
+  .panel {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .panel-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 16px;
+    background: var(--navy);
+    color: #f9fafb;
+    font-size: 0.86rem;
+    font-weight: 850;
+  }
+  .panel-title span:last-child { color: #bfdbfe; font-size: 0.78rem; }
+  .canvas { padding: 22px; }
+  .flow-svg { display: block; width: 100%; height: auto; min-height: 430px; }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 16px;
+    min-height: 160px;
+  }
+  .card.red { border-top: 4px solid var(--red); }
+  .card.green { border-top: 4px solid var(--green); }
+  .card.blue { border-top: 4px solid var(--blue); }
+  .card.amber { border-top: 4px solid var(--amber); }
+  .card h3 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+  .card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+  .pain-callout {
+    color: var(--ink);
+    font-size: 1.15rem;
+    font-weight: 850;
+    line-height: 1.25;
+    margin: 0 0 10px;
+  }
+  .pain-detail {
+    border-top: 1px solid var(--line);
+    margin-top: 12px;
+    padding-top: 12px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .pain-detail b { color: var(--ink); }
+  .label {
+    display: inline-block;
+    margin-bottom: 8px;
+    font-size: 0.72rem;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .label.red { color: var(--red); }
+  .label.green { color: var(--green); }
+  .label.blue { color: var(--blue); }
+  .label.amber { color: var(--amber); }
+
+  .matrix {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(17,24,39,0.05);
+  }
+  .matrix-row {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr 1.25fr;
+    border-bottom: 1px solid var(--line);
+  }
+  .matrix-row:last-child { border-bottom: 0; }
+  .matrix-cell { padding: 16px; font-size: 0.92rem; }
+  .matrix-head { background: #f1f5f9; color: var(--muted); font-size: 0.73rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.05em; }
+  .pain { color: var(--red); font-weight: 750; }
+  .now { color: var(--muted); }
+  .agent { color: var(--ink); font-weight: 700; }
+
+  .talk-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .talk-item {
+    border-left: 5px solid var(--blue);
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 16px;
+    border-top: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .talk-item:nth-child(2) { border-left-color: var(--green); }
+  .talk-item:nth-child(3) { border-left-color: var(--red); }
+  .talk-item:nth-child(4) { border-left-color: var(--amber); }
+  .talk-item h3 { margin: 0 0 8px; font-size: 1rem; }
+  .talk-item p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+
+  @media (max-width: 1020px) {
+    .panel { overflow-x: auto; }
+    .flow-svg { min-width: 930px; }
+  }
+  @media (max-width: 760px) {
+    .slide { padding: 32px 18px; }
+    .grid-2, .grid-3, .talk-list, .matrix-row { grid-template-columns: 1fr; }
+    .card { min-height: auto; }
+  }
+</style>
+</head>
+<body>
+
+  <section class="slide" id="story">
+    <div class="slide-head">
+      <div class="slide-kicker">1. Storyline for the pitch</div>
+      <h1>Three agents, one operating model: prove, decide, remediate.</h1>
+      <p>Today, security tools already produce findings and alerts. The business problem is the handoff: too much noise reaches owners, too much work needs manual judgment, and real risk gets buried inside untrusted queues.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card red">
+        <span class="label red">Red Agent</span>
+        <div class="pain-callout">Security sends findings that nobody trusts.</div>
+        <p>Every critical scanner result asks for attention, but many are theoretical, duplicated, or not exploitable in the real environment.</p>
+        <div class="pain-detail"><b>Red fixes the trust gap:</b> controlled, authorized exploit validation turns raw findings into confirmed exploitable risk or false positive.</div>
+      </div>
+      <div class="card blue">
+        <span class="label blue">Blue Agent</span>
+        <div class="pain-callout">Operations interrupts owners before the story is clear.</div>
+        <p>Alert streams create urgency without enough context, so teams waste time chasing false positives while real events compete for attention.</p>
+        <div class="pain-detail"><b>Blue fixes the confidence gap:</b> investigation, enrichment, and validation happen before an alert becomes an owner interruption.</div>
+      </div>
+      <div class="card green">
+        <span class="label green">Green Agent</span>
+        <div class="pain-callout">Confirmed risk still lands as unclear work.</div>
+        <p>Even when a finding or event is real, owners often receive generic text, weak priority, and no practical fix path.</p>
+        <div class="pain-detail"><b>Green fixes the action gap:</b> confirmed work becomes prioritized remediation with owner-ready next steps.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="red-green">
+    <div class="slide-head">
+      <div class="slide-kicker">2. Red-Green relationship</div>
+      <h2>Reduce finding fatigue before it reaches the ticket system.</h2>
+      <p>Red runs controlled proof to confirm whether a finding is exploitable. Green prioritizes the confirmed risk and prepares remediation. Together they stop low-confidence scanner noise from becoming low-quality tickets.</p>
+    </div>
+    <div class="panel" aria-label="Red Green Agent relationship diagram">
+      <div class="panel-title">
+        <span>Vulnerability finding flow</span>
+        <span>scanner noise to owner-ready remediation</span>
+      </div>
+      <div class="canvas">
+        <svg class="flow-svg" viewBox="0 0 1120 430" role="img" aria-labelledby="rgTitle rgDesc" xmlns="http://www.w3.org/2000/svg">
+          <title id="rgTitle">Red Agent proves vulnerability findings and Green Agent prioritizes remediation</title>
+          <desc id="rgDesc">Native scanners produce raw findings. Red Agent runs controlled authorized proof attempts, confirms exploitable findings, and separates false positives. Green Agent prioritizes confirmed findings and creates actionable remediation before tickets are sent to owners.</desc>
+          <defs>
+            <marker id="rgArrow" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,10 L11,5 z" fill="#2458d3"/>
+            </marker>
+            <style>
+              .rg-box { fill: #ffffff; stroke: #d8e0ea; stroke-width: 2; }
+              .rg-red { fill: #fff1f0; stroke: #b42318; stroke-width: 3; }
+              .rg-green { fill: #effaf3; stroke: #177245; stroke-width: 3; }
+              .rg-blue { fill: #eff6ff; stroke: #2458d3; stroke-width: 2; }
+              .rg-line { stroke: #2458d3; stroke-width: 4; fill: none; marker-end: url(#rgArrow); }
+              .rg-title { fill: #17202c; font: 850 18px Inter, system-ui, sans-serif; }
+              .rg-small { fill: #5f6f83; font: 650 13px Inter, system-ui, sans-serif; }
+              .rg-kicker { font: 850 11px Inter, system-ui, sans-serif; letter-spacing: 1px; }
+              .rg-kicker-red { fill: #b42318; }
+              .rg-kicker-green { fill: #177245; }
+              .rg-kicker-blue { fill: #2458d3; }
+              .rg-muted { fill: #5f6f83; font: 700 12px Inter, system-ui, sans-serif; }
+            </style>
+          </defs>
+          <rect width="1120" height="430" fill="#ffffff"/>
+
+          <rect class="rg-blue" x="36" y="62" width="230" height="118" rx="10"/>
+          <text class="rg-kicker rg-kicker-blue" x="58" y="92">TODAY</text>
+          <text class="rg-title" x="58" y="122">Raw findings</text>
+          <text class="rg-small" x="58" y="148">SAST / SCA / container / host</text>
+          <text class="rg-small" x="58" y="168">High volume, mixed confidence</text>
+
+          <path class="rg-line" d="M270 121 H360"/>
+
+          <rect class="rg-red" x="370" y="48" width="250" height="146" rx="10"/>
+          <text class="rg-kicker rg-kicker-red" x="394" y="80">RED AGENT</text>
+          <text class="rg-title" x="394" y="112">Prove it is real</text>
+          <text class="rg-small" x="394" y="140">Run controlled proof attempt</text>
+          <text class="rg-small" x="394" y="160">Capture evidence and verdict</text>
+          <text class="rg-small" x="394" y="180">Separate real from false positive</text>
+
+          <path class="rg-line" d="M624 121 H714"/>
+
+          <rect class="rg-green" x="724" y="48" width="250" height="146" rx="10"/>
+          <text class="rg-kicker rg-kicker-green" x="748" y="80">GREEN AGENT</text>
+          <text class="rg-title" x="748" y="112">Make it actionable</text>
+          <text class="rg-small" x="748" y="140">Prioritize confirmed risk</text>
+          <text class="rg-small" x="748" y="160">Write remediation steps</text>
+          <text class="rg-small" x="748" y="180">Prepare owner-ready ticket</text>
+
+          <path class="rg-line" d="M849 198 V266"/>
+
+          <rect class="rg-box" x="640" y="276" width="418" height="108" rx="10"/>
+          <text class="rg-title" x="668" y="310">What changes</text>
+          <text class="rg-small" x="668" y="332">Tickets contain confirmed exploitability, priority,</text>
+          <text class="rg-small" x="668" y="352">evidence, and fix guidance before owner handoff.</text>
+          <text class="rg-small" x="668" y="372">Owners receive fewer low-quality tasks and less rework.</text>
+
+          <rect class="rg-box" x="36" y="276" width="418" height="98" rx="10"/>
+          <text class="rg-title" x="64" y="310">Current pain</text>
+          <text class="rg-small" x="64" y="338">Scanner output goes straight to manual review or tickets.</text>
+          <text class="rg-small" x="64" y="358">Result: finding fatigue, low trust, backlog growth.</text>
+
+          <text class="rg-muted" x="514" y="251">gate: only confirmed exploitable risk moves forward</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="blue-green">
+    <div class="slide-head">
+      <div class="slide-kicker">3. Blue-Green relationship</div>
+      <h2>Reduce alert fatigue before it interrupts the owner.</h2>
+      <p>Blue investigates whether an event is real or false-positive. Green converts the confirmed issue into remediation guidance and owner communication.</p>
+    </div>
+    <div class="panel" aria-label="Blue Green Agent relationship diagram">
+      <div class="panel-title">
+        <span>Security event flow</span>
+        <span>alert noise to owner-ready action</span>
+      </div>
+      <div class="canvas">
+        <svg class="flow-svg" viewBox="0 0 1120 430" role="img" aria-labelledby="bgTitle bgDesc" xmlns="http://www.w3.org/2000/svg">
+          <title id="bgTitle">Blue Agent investigates alerts and Green Agent creates remediation</title>
+          <desc id="bgDesc">SIEM, EDR, network, and cloud tools produce alerts. Blue Agent investigates the event and decides real versus false positive. Green Agent creates remediation and owner-ready guidance for confirmed incidents.</desc>
+          <defs>
+            <marker id="bgArrow" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,10 L11,5 z" fill="#2458d3"/>
+            </marker>
+            <style>
+              .bg-box { fill: #ffffff; stroke: #d8e0ea; stroke-width: 2; }
+              .bg-blue { fill: #eff6ff; stroke: #2458d3; stroke-width: 3; }
+              .bg-green { fill: #effaf3; stroke: #177245; stroke-width: 3; }
+              .bg-amber { fill: #fff7ed; stroke: #a65f00; stroke-width: 2; }
+              .bg-line { stroke: #2458d3; stroke-width: 4; fill: none; marker-end: url(#bgArrow); }
+              .bg-soft { stroke: #a65f00; stroke-width: 3; fill: none; marker-end: url(#bgArrow); stroke-dasharray: 7 6; }
+              .bg-title { fill: #17202c; font: 850 18px Inter, system-ui, sans-serif; }
+              .bg-small { fill: #5f6f83; font: 650 13px Inter, system-ui, sans-serif; }
+              .bg-kicker { font: 850 11px Inter, system-ui, sans-serif; letter-spacing: 1px; }
+              .bg-kicker-blue { fill: #2458d3; }
+              .bg-kicker-green { fill: #177245; }
+              .bg-kicker-amber { fill: #a65f00; }
+              .bg-muted { fill: #5f6f83; font: 700 12px Inter, system-ui, sans-serif; }
+            </style>
+          </defs>
+          <rect width="1120" height="430" fill="#ffffff"/>
+
+          <rect class="bg-box" x="36" y="62" width="230" height="118" rx="10"/>
+          <text class="bg-kicker bg-kicker-blue" x="58" y="92">TODAY</text>
+          <text class="bg-title" x="58" y="122">Raw alerts</text>
+          <text class="bg-small" x="58" y="148">SIEM / EDR / network / cloud</text>
+          <text class="bg-small" x="58" y="168">High volume, mixed quality</text>
+
+          <path class="bg-line" d="M270 121 H360"/>
+
+          <rect class="bg-blue" x="370" y="48" width="250" height="146" rx="10"/>
+          <text class="bg-kicker bg-kicker-blue" x="394" y="80">BLUE AGENT</text>
+          <text class="bg-title" x="394" y="112">Investigate event</text>
+          <text class="bg-small" x="394" y="140">Enrich with context</text>
+          <text class="bg-small" x="394" y="160">Confirm real vs false-positive</text>
+          <text class="bg-small" x="394" y="180">Escalate only with evidence</text>
+
+          <path class="bg-soft" d="M496 198 V246 H274 V258"/>
+          <rect class="bg-amber" x="144" y="262" width="260" height="78" rx="10"/>
+          <text class="bg-kicker bg-kicker-amber" x="168" y="292">FALSE POSITIVE PATH</text>
+          <text class="bg-small" x="168" y="318">Close, document reason, tune rule.</text>
+
+          <path class="bg-line" d="M624 121 H714"/>
+
+          <rect class="bg-green" x="724" y="48" width="250" height="146" rx="10"/>
+          <text class="bg-kicker bg-kicker-green" x="748" y="80">GREEN AGENT</text>
+          <text class="bg-title" x="748" y="112">Guide remediation</text>
+          <text class="bg-small" x="748" y="140">Suggest containment or fix</text>
+          <text class="bg-small" x="748" y="160">Map owner and action</text>
+          <text class="bg-small" x="748" y="180">Prepare escalation message</text>
+
+          <path class="bg-line" d="M974 121 H1030 V276"/>
+
+          <rect class="bg-box" x="640" y="286" width="478" height="86" rx="10"/>
+          <text class="bg-title" x="668" y="320">What changes</text>
+          <text class="bg-small" x="668" y="348">Owners get fewer alerts, with evidence and the next action attached.</text>
+
+          <text class="bg-muted" x="668" y="251">gate: owner alert only after Blue confirms the event</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="management">
+    <div class="slide-head">
+      <div class="slide-kicker">4. Upper management talk track</div>
+      <h2>The management message is not "more AI." It is operating leverage.</h2>
+      <p>Position the agents as a control layer between security tools and business owners. The value is less noise, faster confirmation, clearer accountability, and better evidence for audit and risk reporting.</p>
+    </div>
+    <div class="talk-list">
+      <div class="talk-item">
+        <h3>Business pain</h3>
+        <p>Security teams already bought tools, but owners still receive too many weak findings and unclear alerts. That creates fatigue and slows real risk reduction.</p>
+      </div>
+      <div class="talk-item">
+        <h3>Operating model</h3>
+        <p>Red and Blue decide what is real. Green decides what should be done next. Humans keep approval authority, but agents remove the repetitive triage work.</p>
+      </div>
+      <div class="talk-item">
+        <h3>Metrics to show</h3>
+        <p>Track fewer tickets created, higher confirmed-risk ratio, faster mean time to triage, fewer reopened tickets, and higher owner acceptance of remediation guidance.</p>
+      </div>
+      <div class="talk-item">
+        <h3>Governance point</h3>
+        <p>Every agent decision should leave evidence: why it was confirmed, why it was closed, who approved it, and what remediation was recommended.</p>
+      </div>
+    </div>
+    <div style="height:16px"></div>
+    <div class="matrix">
+      <div class="matrix-row matrix-head">
+        <div class="matrix-cell">Question from management</div>
+        <div class="matrix-cell">Current answer</div>
+        <div class="matrix-cell">Agent answer</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">Why are teams ignoring security tickets?</div>
+        <div class="matrix-cell now">Too many tickets are low-confidence, duplicated, or missing remediation detail.</div>
+        <div class="matrix-cell agent">Only confirmed, prioritized, owner-ready work reaches the ticket queue.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">How do we know risk is actually reduced?</div>
+        <div class="matrix-cell now">Reports count findings and alerts, not validated outcomes.</div>
+        <div class="matrix-cell agent">Evidence, decision, remediation, and approval are captured as one audit trail.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">Why not just buy another tool?</div>
+        <div class="matrix-cell now">Another console adds another queue unless the operating process changes.</div>
+        <div class="matrix-cell agent">Agents sit above existing tools and improve the handoff to humans and owners.</div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

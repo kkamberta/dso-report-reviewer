@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSO Report Reviewer - Native Scanning Gap</title>
+<style>
+  :root {
+    --ink: #17202c;
+    --muted: #5f6f83;
+    --bg: #f5f7fb;
+    --paper: #ffffff;
+    --line: #d8e0ea;
+    --line-strong: #b8c5d5;
+    --blue: #2458d3;
+    --teal: #087f8c;
+    --green: #177245;
+    --amber: #a65f00;
+    --red: #b42318;
+    --plum: #6741a3;
+    --navy: #111827;
+    --shadow: 0 18px 45px rgba(17, 24, 39, 0.11);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+
+  /* Each .slide is sized/composed to be screenshotted as one PPT slide. */
+  .slide {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
+  .slide-head { margin-bottom: 20px; max-width: 860px; }
+  .slide-kicker { color: var(--blue); font-size: 0.78rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.06em; }
+  h2 { font-size: clamp(1.6rem, 3vw, 2.35rem); line-height: 1.1; margin: 8px 0 10px; letter-spacing: 0; }
+  .slide-head p { color: var(--muted); margin: 0; font-size: 1rem; }
+
+  .diagram-wrap {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .diagram-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 16px;
+    background: #111827;
+    color: #f9fafb;
+    font-size: 0.86rem;
+    font-weight: 850;
+  }
+  .diagram-title span:last-child { color: #fca5a1; font-size: 0.78rem; }
+  .diagram-wrap svg { display: block; width: 100%; height: auto; min-height: 460px; }
+
+  .matrix {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(17,24,39,0.05);
+  }
+  .matrix-row {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    border-bottom: 1px solid var(--line);
+  }
+  .matrix-row:last-child { border-bottom: 0; }
+  .matrix-cell { padding: 16px; font-size: 0.92rem; }
+  .matrix-cell.pain { color: var(--red); font-weight: 700; }
+  .matrix-cell.fix { color: var(--muted); }
+  .matrix-head { background: #f1f5f9; color: var(--muted); font-size: 0.73rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.05em; }
+  .matrix-head .matrix-cell { color: var(--muted); }
+  .matrix-row.three { grid-template-columns: 1fr 1.3fr 1.3fr; }
+  .matrix-cell.today { color: var(--green); }
+  .matrix-cell.goal { color: var(--muted); }
+
+  .position-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+  .pos-pill { border: 1px solid var(--line-strong); background: var(--paper); border-radius: 999px; padding: 8px 16px; font-size: 0.86rem; font-weight: 750; color: var(--ink); }
+  .pos-pill.agent { border-color: var(--green); color: var(--green); background: #effaf3; font-weight: 850; }
+  .pos-arrow { color: var(--muted); font-weight: 800; font-size: 1.1rem; }
+
+  @media (max-width: 1020px) {
+    .diagram-wrap { overflow-x: auto; }
+    .diagram-wrap svg { min-width: 900px; }
+  }
+  @media (max-width: 720px) {
+    .slide { padding: 32px 18px; }
+    .matrix-row, .matrix-row.three { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <section class="slide" id="gap">
+    <div class="slide-head">
+      <div class="slide-kicker">1. The problem picture</div>
+      <h2>The queue is full, but the work is not ready.</h2>
+      <p>Code, Lib, Container, and Host scanners already find issues. The business pain starts after the scan: owners receive raw findings that still need judgment, priority, and a usable fix path.</p>
+    </div>
+    <div class="diagram-wrap" aria-label="Native scanning silo diagram">
+      <div class="diagram-title">
+        <span>Native VA / AppSec scanning today</span>
+        <span>four tools, one overwhelmed reviewer</span>
+      </div>
+      <svg viewBox="0 0 1180 480" role="img" aria-labelledby="gapTitle gapDesc" xmlns="http://www.w3.org/2000/svg">
+        <title id="gapTitle">Four native scanning tools land on one reviewer, who carries the pain</title>
+        <desc id="gapDesc">Code, Lib, Container, and Host scanners are grouped as one block of native tools. A single arrow points from that block to a reviewer persona (Dev / Sec). Below the persona, three pains are listed: reports are not ready to use, there is no risk prioritization, and each tool is its own silo.</desc>
+        <defs>
+          <marker id="gapArrow" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,10 L11,5 z" fill="#2458d3"/>
+          </marker>
+          <style>
+            .g-bg { fill: #ffffff; }
+            .g-zone-dashed { fill: #f8fafc; stroke: #7c8ea8; stroke-width: 2; stroke-dasharray: 7 6; }
+            .g-box { fill: #eff6ff; stroke: #2458d3; stroke-width: 2; }
+            .g-title { fill: #17202c; font: 800 16px Inter, system-ui, sans-serif; }
+            .g-small { fill: #5f6f83; font: 600 12px Inter, system-ui, sans-serif; }
+            .g-kicker { fill: #2458d3; font: 850 11px Inter, system-ui, sans-serif; letter-spacing: 1px; }
+            .g-line { stroke: #2458d3; stroke-width: 4; fill: none; marker-end: url(#gapArrow); }
+            .g-redbox { fill: #fff1f0; stroke: #b42318; stroke-width: 2; }
+            .g-red-kicker { fill: #b42318; font: 850 11px Inter, system-ui, sans-serif; letter-spacing: 1px; }
+            .g-red-text { fill: #7a1810; font: 700 14px Inter, system-ui, sans-serif; }
+            .g-tri { fill: #b42318; }
+            .g-bang { fill: #ffffff; font: 900 11px Inter, system-ui, sans-serif; }
+            .g-person { fill: #111827; }
+            .g-person-label { fill: #17202c; font: 800 14px Inter, system-ui, sans-serif; }
+            .g-person-sub { fill: #5f6f83; font: 600 11px Inter, system-ui, sans-serif; }
+          </style>
+        </defs>
+        <rect class="g-bg" width="1180" height="480"/>
+
+        <!-- Grouped block: all four native tools, treated as peers not a pipeline -->
+        <rect class="g-zone-dashed" x="28" y="34" width="640" height="240" rx="12"/>
+        <text class="g-kicker" x="48" y="60">NATIVE VA / APPSEC SCANNING TOOLS</text>
+
+        <rect class="g-box" x="48" y="76" width="280" height="86" rx="8"/>
+        <text class="g-title" x="64" y="106">CODE — SAST</text>
+        <text class="g-small" x="64" y="128">Static code analysis</text>
+        <text class="g-small" x="64" y="144">e.g. SAST Tools</text>
+
+        <rect class="g-box" x="348" y="76" width="280" height="86" rx="8"/>
+        <text class="g-title" x="364" y="106">LIB — SCA</text>
+        <text class="g-small" x="364" y="128">Open-source / dependency scan</text>
+        <text class="g-small" x="364" y="144">e.g. SCA Tools</text>
+
+        <rect class="g-box" x="48" y="174" width="280" height="86" rx="8"/>
+        <text class="g-title" x="64" y="204">CONTAINER</text>
+        <text class="g-small" x="64" y="226">Image CVEs, secrets, malware</text>
+        <text class="g-small" x="64" y="242">e.g. CNAPP Tools</text>
+
+        <rect class="g-box" x="348" y="174" width="280" height="86" rx="8"/>
+        <text class="g-title" x="364" y="204">HOST / OS</text>
+        <text class="g-small" x="364" y="226">OS-level vulnerability scan</text>
+        <text class="g-small" x="364" y="242">e.g. native VA tools</text>
+
+        <!-- Single arrow from the grouped block to the human who absorbs all four reports -->
+        <path class="g-line" d="M672 154 H772"/>
+
+        <!-- Reviewer persona: Dev / Sec -->
+        <circle class="g-person" cx="880" cy="118" r="34"/>
+        <path class="g-person" d="M810 232 C810 178, 950 178, 950 232 Z"/>
+        <polygon class="g-tri" points="908,78 892,106 924,106"/>
+        <text class="g-bang" x="908" y="102" text-anchor="middle">!</text>
+        <text class="g-person-label" x="880" y="256" text-anchor="middle">Dev / Sec reviewer</text>
+        <text class="g-person-sub" x="880" y="274" text-anchor="middle">receives all four reports</text>
+
+        <!-- Combined pain list -->
+        <rect class="g-redbox" x="28" y="308" width="1124" height="142" rx="8"/>
+        <text class="g-red-kicker" x="48" y="334">THE GAP</text>
+
+        <polygon class="g-tri" points="48,344 34,368 62,368"/>
+        <text class="g-bang" x="48" y="364" text-anchor="middle">!</text>
+        <text class="g-red-text" x="76" y="362">Owners get raw scanner output — not a clear action they can execute.</text>
+
+        <polygon class="g-tri" points="48,378 34,402 62,402"/>
+        <text class="g-bang" x="48" y="398" text-anchor="middle">!</text>
+        <text class="g-red-text" x="76" y="396">Priority is unclear — critical business apps and low-risk apps look the same.</text>
+
+        <polygon class="g-tri" points="48,412 34,436 62,436"/>
+        <text class="g-bang" x="48" y="432" text-anchor="middle">!</text>
+        <text class="g-red-text" x="76" y="430">The reviewer becomes the integration layer across tools, formats, and teams.</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="slide" id="fix">
+    <div class="slide-head">
+      <div class="slide-kicker">2. The fix</div>
+      <h2>Each pain gets a process, not just a promise.</h2>
+      <p>No new scanners. A review step sits after the four native tools and closes each gap above.</p>
+    </div>
+    <div class="matrix">
+      <div class="matrix-row matrix-head">
+        <div class="matrix-cell">Pain</div>
+        <div class="matrix-cell">Process that closes it</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">Owners cannot act on generic scanner language</div>
+        <div class="matrix-cell fix">A structured remediation step turns the scanner's raw text into practical guidance — patch commands (pip / npm / mvn / apk / dnf style) or container rebuild direction inferred from the finding's package and CVE metadata. Goal: get this closer to full codebase- and language-matched guidance over time.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">One reviewer must normalize four different report worlds</div>
+        <div class="matrix-cell fix">A single intake step ingests every scanner sheet type from one export and produces one combined executive summary and one annotated workbook — instead of opening four separate tool consoles.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">Business priority is missing from raw severity</div>
+        <div class="matrix-cell fix">Each finding is scored against the application's actual business priority (maintained priority mapping), producing a residual severity distinct from the scanner's raw severity. High-priority apps get escalated attention; severity jumps of 2+ levels are automatically flagged for mandatory human review.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">The report still needs rewrite, review, and cleanup before handoff</div>
+        <div class="matrix-cell fix">Every row is checked for complete coverage, a valid severity value, and a populated remediation field before the report ships — so the handoff document is reviewable immediately, not a raw dump requiring cleanup first.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="agent">
+    <div class="slide-head">
+      <div class="slide-kicker">3. Who closes the gap</div>
+      <h2>Green Agent sits after the four scanners and works each gap closed.</h2>
+      <p>Green Agent drafts remediation, scores priority, and validates every row before a human signs off. Here's what it does today, and what closing each gap fully still requires.</p>
+    </div>
+    <div class="position-strip" aria-label="Where Green Agent sits in the flow">
+      <span class="pos-pill">Code / Lib / Container / Host scanners</span>
+      <span class="pos-arrow">&rarr;</span>
+      <span class="pos-pill agent">Green Agent</span>
+      <span class="pos-arrow">&rarr;</span>
+      <span class="pos-pill">Reviewer sign-off</span>
+    </div>
+    <div class="matrix">
+      <div class="matrix-row matrix-head three">
+        <div class="matrix-cell">Pain</div>
+        <div class="matrix-cell">Green Agent today</div>
+        <div class="matrix-cell">Goal: full elimination</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">Generic scanner text, hard to know what to do next</div>
+        <div class="matrix-cell today">Turns scanner text into a patch command (pip / npm / mvn / apk / dnf style) or rebuild step inferred from the finding's package and CVE metadata.</div>
+        <div class="matrix-cell goal">Match remediation to the actual codebase and language, not just the scanner's text description.</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">So many reports across Code / Lib / Container / Host</div>
+        <div class="matrix-cell today">Ingests every scanner sheet type from one export into one combined summary and one annotated workbook.</div>
+        <div class="matrix-cell goal">Correlate and de-duplicate the same underlying issue when two scanners report it independently, so it appears once.</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">No risk prioritization</div>
+        <div class="matrix-cell today">Scores every finding against the application's actual business priority; severity jumps of 2+ levels are flagged for mandatory human review.</div>
+        <div class="matrix-cell goal">Bring in live exposure / network context, not just a static priority mapping, so prioritization reflects real-time risk.</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">Report not ready to use</div>
+        <div class="matrix-cell today">Validates every row for coverage, valid severity, and a populated remediation field before the report ships.</div>
+        <div class="matrix-cell goal">Push the validated, prioritized report straight into the team's existing workflow (ticket, PR comment) once approval rules are proven.</div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

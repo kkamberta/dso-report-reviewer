@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red Agent - Exploit Confirmation Gap</title>
+<style>
+  :root {
+    --ink: #17202c;
+    --muted: #5f6f83;
+    --bg: #f5f7fb;
+    --paper: #ffffff;
+    --line: #d8e0ea;
+    --line-strong: #b8c5d5;
+    --blue: #2458d3;
+    --teal: #087f8c;
+    --green: #177245;
+    --amber: #a65f00;
+    --red: #b42318;
+    --plum: #6741a3;
+    --navy: #111827;
+    --shadow: 0 18px 45px rgba(17, 24, 39, 0.11);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+
+  /* Each .slide is sized/composed to be screenshotted as one PPT slide. */
+  .slide {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
+  .slide-head { margin-bottom: 20px; max-width: 860px; }
+  .slide-kicker { color: var(--blue); font-size: 0.78rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.06em; }
+  h2 { font-size: clamp(1.6rem, 3vw, 2.35rem); line-height: 1.1; margin: 8px 0 10px; letter-spacing: 0; }
+  .slide-head p { color: var(--muted); margin: 0; font-size: 1rem; }
+
+  .diagram-wrap {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .diagram-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 16px;
+    background: #111827;
+    color: #f9fafb;
+    font-size: 0.86rem;
+    font-weight: 850;
+  }
+  .diagram-title span:last-child { color: #fca5a1; font-size: 0.78rem; }
+  .diagram-wrap svg { display: block; width: 100%; height: auto; min-height: 460px; }
+
+  .matrix {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(17,24,39,0.05);
+  }
+  .matrix-row {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    border-bottom: 1px solid var(--line);
+  }
+  .matrix-row:last-child { border-bottom: 0; }
+  .matrix-cell { padding: 16px; font-size: 0.92rem; }
+  .matrix-cell.pain { color: var(--red); font-weight: 700; }
+  .matrix-cell.fix { color: var(--muted); }
+  .matrix-head { background: #f1f5f9; color: var(--muted); font-size: 0.73rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.05em; }
+  .matrix-head .matrix-cell { color: var(--muted); }
+  .matrix-row.three { grid-template-columns: 1fr 1.3fr 1.3fr; }
+  .matrix-cell.today { color: var(--red); }
+  .matrix-cell.goal { color: var(--muted); }
+
+  .position-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+  .pos-pill { border: 1px solid var(--line-strong); background: var(--paper); border-radius: 999px; padding: 8px 16px; font-size: 0.86rem; font-weight: 750; color: var(--ink); }
+  .pos-pill.agent { border-color: var(--red); color: var(--red); background: #fff1f0; font-weight: 850; }
+  .pos-arrow { color: var(--muted); font-weight: 800; font-size: 1.1rem; }
+
+  .auth-note {
+    border: 1px solid var(--line-strong);
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.86rem;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .auth-note b { color: var(--ink); }
+
+  @media (max-width: 1020px) {
+    .diagram-wrap { overflow-x: auto; }
+    .diagram-wrap svg { min-width: 900px; }
+  }
+  @media (max-width: 720px) {
+    .slide { padding: 32px 18px; }
+    .matrix-row, .matrix-row.three { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <section class="slide" id="gap">
+    <div class="slide-head">
+      <div class="slide-kicker">1. The problem picture</div>
+      <h2>The dangerous part is deciding what to trust.</h2>
+      <p>Code, Lib, Container, and Host scanners already report findings. The business pain is that unproven findings compete with real exploitable risk for the same scarce pentest attention.</p>
+    </div>
+    <div class="diagram-wrap" aria-label="Exploit confirmation silo diagram">
+      <div class="diagram-title">
+        <span>Native scan findings today</span>
+        <span>four categories, one overloaded Red Team</span>
+      </div>
+      <svg viewBox="0 0 1180 480" role="img" aria-labelledby="redGapTitle redGapDesc" xmlns="http://www.w3.org/2000/svg">
+        <title id="redGapTitle">Four native scan finding categories land on one Red Team, who carries the pain</title>
+        <desc id="redGapDesc">Code, Lib, Container, and Host scan findings are grouped as one block. A single arrow points from that block to a Red Team persona. Below the persona, three pains are listed: findings have no proof of exploitability, there is no risk confirmation, and validation work is its own silo.</desc>
+        <defs>
+          <marker id="redGapArrow" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,10 L11,5 z" fill="#2458d3"/>
+          </marker>
+          <style>
+            .g-bg { fill: #ffffff; }
+            .g-zone-dashed { fill: #f8fafc; stroke: #7c8ea8; stroke-width: 2; stroke-dasharray: 7 6; }
+            .g-box { fill: #eff6ff; stroke: #2458d3; stroke-width: 2; }
+            .g-title { fill: #17202c; font: 800 16px Inter, system-ui, sans-serif; }
+            .g-small { fill: #5f6f83; font: 600 12px Inter, system-ui, sans-serif; }
+            .g-kicker { fill: #2458d3; font: 850 11px Inter, system-ui, sans-serif; letter-spacing: 1px; }
+            .g-line { stroke: #2458d3; stroke-width: 4; fill: none; marker-end: url(#redGapArrow); }
+            .g-redbox { fill: #fff1f0; stroke: #b42318; stroke-width: 2; }
+            .g-red-kicker { fill: #b42318; font: 850 11px Inter, system-ui, sans-serif; letter-spacing: 1px; }
+            .g-red-text { fill: #7a1810; font: 700 14px Inter, system-ui, sans-serif; }
+            .g-tri { fill: #b42318; }
+            .g-bang { fill: #ffffff; font: 900 11px Inter, system-ui, sans-serif; }
+            .g-person { fill: #111827; }
+            .g-person-label { fill: #17202c; font: 800 14px Inter, system-ui, sans-serif; }
+            .g-person-sub { fill: #5f6f83; font: 600 11px Inter, system-ui, sans-serif; }
+          </style>
+        </defs>
+        <rect class="g-bg" width="1180" height="480"/>
+
+        <!-- Grouped block: all four scan finding categories, treated as peers not a pipeline -->
+        <rect class="g-zone-dashed" x="28" y="34" width="640" height="240" rx="12"/>
+        <text class="g-kicker" x="48" y="60">NATIVE SCAN FINDING CATEGORIES</text>
+
+        <rect class="g-box" x="48" y="76" width="280" height="86" rx="8"/>
+        <text class="g-title" x="64" y="106">CODE — SAST</text>
+        <text class="g-small" x="64" y="128">Static code analysis findings</text>
+        <text class="g-small" x="64" y="144">e.g. SAST Tools</text>
+
+        <rect class="g-box" x="348" y="76" width="280" height="86" rx="8"/>
+        <text class="g-title" x="364" y="106">LIB — SCA</text>
+        <text class="g-small" x="364" y="128">Open-source / dependency findings</text>
+        <text class="g-small" x="364" y="144">e.g. SCA Tools</text>
+
+        <rect class="g-box" x="48" y="174" width="280" height="86" rx="8"/>
+        <text class="g-title" x="64" y="204">CONTAINER</text>
+        <text class="g-small" x="64" y="226">Image CVEs, secrets, malware</text>
+        <text class="g-small" x="64" y="242">e.g. CNAPP Tools</text>
+
+        <rect class="g-box" x="348" y="174" width="280" height="86" rx="8"/>
+        <text class="g-title" x="364" y="204">HOST / OS</text>
+        <text class="g-small" x="364" y="226">OS-level vulnerability findings</text>
+        <text class="g-small" x="364" y="242">e.g. native VA tools</text>
+
+        <!-- Single arrow from the grouped block to the human who absorbs all four finding categories -->
+        <path class="g-line" d="M672 154 H772"/>
+
+        <!-- Red Team persona -->
+        <circle class="g-person" cx="880" cy="118" r="34"/>
+        <path class="g-person" d="M810 232 C810 178, 950 178, 950 232 Z"/>
+        <polygon class="g-tri" points="908,78 892,106 924,106"/>
+        <text class="g-bang" x="908" y="102" text-anchor="middle">!</text>
+        <text class="g-person-label" x="880" y="256" text-anchor="middle">Red Team</text>
+        <text class="g-person-sub" x="880" y="274" text-anchor="middle">receives all four finding categories</text>
+
+        <!-- Combined pain list -->
+        <rect class="g-redbox" x="28" y="308" width="1124" height="142" rx="8"/>
+        <text class="g-red-kicker" x="48" y="334">THE GAP</text>
+
+        <polygon class="g-tri" points="48,344 34,368 62,368"/>
+        <text class="g-bang" x="48" y="364" text-anchor="middle">!</text>
+        <text class="g-red-text" x="76" y="362">A critical label is not proof — owners still ask, "is this real?"</text>
+
+        <polygon class="g-tri" points="48,378 34,402 62,402"/>
+        <text class="g-bang" x="48" y="398" text-anchor="middle">!</text>
+        <text class="g-red-text" x="76" y="396">Real exploitable risk waits behind theoretical findings and false positives.</text>
+
+        <polygon class="g-tri" points="48,412 34,436 62,436"/>
+        <text class="g-bang" x="48" y="432" text-anchor="middle">!</text>
+        <text class="g-red-text" x="76" y="430">Proof work is scattered, so evidence is hard to reuse or defend.</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="slide" id="fix">
+    <div class="slide-head">
+      <div class="slide-kicker">2. The fix</div>
+      <h2>Each pain gets a process, not just a promise.</h2>
+      <p>No new scanners. A review step sits after the four native finding categories and closes each gap above.</p>
+    </div>
+    <div class="matrix">
+      <div class="matrix-row matrix-head">
+        <div class="matrix-cell">Pain</div>
+        <div class="matrix-cell">Process that closes it</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">The team cannot tell which "critical" finding deserves action</div>
+        <div class="matrix-cell fix">A controlled exploitation step attempts the proof-of-concept against the finding inside an isolated, pre-authorized scope and returns a confirmed / false-positive verdict — separating real risk from noise before the Red Team has to manually test it.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">False positives consume the same attention as real risk</div>
+        <div class="matrix-cell fix">A confirmation step marks each finding "confirmed exploitable" or "false positive" based on the controlled attack's outcome, producing an evidence-backed risk rank distinct from the scanner's raw severity.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">Exploit evidence is scattered across tools and spreadsheets</div>
+        <div class="matrix-cell fix">A single validation queue runs and tracks exploitation attempts across code, lib, container, and host categories in one place.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">Each finding starts another manual proof exercise</div>
+        <div class="matrix-cell fix">Every finding ships with the proof-of-concept evidence, reproduction steps, and verdict already captured from the controlled exploitation attempt, so the Red Team reviews evidence, not a blank page.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="agent">
+    <div class="slide-head">
+      <div class="slide-kicker">3. Who closes the gap</div>
+      <h2>Red Agent sits after the four scan categories and works each gap closed.</h2>
+      <p>Red Agent attempts the exploit itself, under controlled and authorized conditions, to prove whether a finding is genuinely exploitable — eliminating false positives before they ever reach the Red Team's queue. The Red Team still reviews and confirms every verdict.</p>
+    </div>
+    <div class="auth-note"><b>Authorization boundary:</b> Red Agent only runs controlled, non-destructive exploitation attempts inside the scope explicitly authorized for the engagement — it never acts outside that boundary, and every result is reviewed and confirmed by the Red Team before it's reported as risk.</div>
+    <div class="position-strip" aria-label="Where Red Agent sits in the flow">
+      <span class="pos-pill">Code / Lib / Container / Host scan findings</span>
+      <span class="pos-arrow">&rarr;</span>
+      <span class="pos-pill agent">Red Agent</span>
+      <span class="pos-arrow">&rarr;</span>
+      <span class="pos-pill">Red Team confirmation</span>
+    </div>
+    <div class="matrix">
+      <div class="matrix-row matrix-head three">
+        <div class="matrix-cell">Pain</div>
+        <div class="matrix-cell">Red Agent today</div>
+        <div class="matrix-cell">Goal: full elimination</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">Finding has no proof of exploitability</div>
+        <div class="matrix-cell today">Red Agent runs a controlled, non-destructive exploitation attempt against the finding inside the engagement's authorized scope and returns a confirmed-exploitable or false-positive verdict — the same triage-and-validate pattern already proven for scan findings in the DSO product, now extended to active proof instead of just text drafting.</div>
+        <div class="matrix-cell goal">Extend controlled exploitation coverage to more complex, multi-step attack chains, not just single-finding proof attempts.</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">No risk confirmation</div>
+        <div class="matrix-cell today">Red Agent's exploitation outcome produces a definitive confirmed-exploitable or false-positive verdict per finding, replacing a guessed severity with an evidence-backed one.</div>
+        <div class="matrix-cell goal">Automatically re-validate findings as the environment changes, so a confirmed verdict doesn't go stale between test cycles.</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">Silo — manual PoC tracking across separate tools</div>
+        <div class="matrix-cell today">Red Agent runs and tracks exploitation attempts across code, lib, container, and host findings in one place, instead of four separate spreadsheets and tools.</div>
+        <div class="matrix-cell goal">Integrate directly with the Red Team's existing exploitation toolchain so evidence capture happens where the work already happens.</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">Finding not ready to use</div>
+        <div class="matrix-cell today">Red Agent attaches the proof-of-concept evidence, reproduction steps, and verdict to every finding before it reaches the Red Team — a ready-to-report result, not a hypothesis.</div>
+        <div class="matrix-cell goal">Push the confirmed, evidence-backed finding straight into the pentest report template once reporting rules are proven.</div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

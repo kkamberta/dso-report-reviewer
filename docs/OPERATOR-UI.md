@@ -6,6 +6,10 @@
 
 `customer-pitch.html` is a separate customer-facing explanation page for management and sales conversations. It answers what the agent is, why a customer would need it, where it fits in the customer environment, how it works, the MVP demo scenario, and common objections.
 
+`agent-relationship-gap-analysis-pitch.html` is a static cross-agent pitch page showing how Red, Blue, and Green agents relate to each other. It covers the business pain behind each agent, the Red-Green vulnerability flow with controlled exploit validation, the Blue-Green alert flow, and the upper-management talk track around finding fatigue, alert fatigue, operating leverage, and governance evidence.
+
+`appsec-gap-analysis-pitch.html`, `red-gap-analysis-pitch.html`, and `soc-gap-analysis-pitch.html` are individual agent pitch pages. Their first slides should lead with business pain before process detail: unactionable scan handoff for Green, untrusted exploitability for Red, and unclear alert escalation for Blue.
+
 The UI shows the workflow expected from the container/webhook version:
 
 1. Submit a CI artifact URL and project metadata.
@@ -27,6 +31,8 @@ The UI shows the workflow expected from the container/webhook version:
 Open `ui/index.html` directly in a browser.
 
 Open `customer-pitch.html` directly in a browser for the customer pitch version.
+
+Open `agent-relationship-gap-analysis-pitch.html` directly in a browser for the cross-agent relationship pitch.
 
 For the live demo, start the demo agent and open:
 
@@ -74,6 +80,7 @@ No dev server is required for the current version.
 - Filters update the findings table without page reload.
 - Approve and Override buttons update the selected row state.
 - The customer pitch page covers the expected customer questions and links to the operator UI.
+- The cross-agent relationship pitch page covers Red-Green and Blue-Green collaboration plus an upper-management talk track.
 - The customer pitch page includes a narrow MVP demo scenario with setup, 10-minute room flow, and v1 boundaries.
 - The demo agent can create a completed mock job and write summary/XLSX outputs.
 - The operator UI can call the demo agent, run the one-click `build-92619` demo job, refresh job status, load findings, and open output downloads.
@@ -90,4 +97,4 @@ Any MVP demo behavior, endpoint, UI flow, sample job, expected finding, output f
 
 ## Rollback
 
-Delete `ui/index.html`, `customer-pitch.html`, `demo_agent.py`, and this document to remove the UI/pitch/demo additions. The CLI reviewer and existing `pitch.html` page are not changed by this UI.
+Delete `ui/index.html`, `customer-pitch.html`, `agent-relationship-gap-analysis-pitch.html`, `demo_agent.py`, and this document to remove the UI/pitch/demo additions. The CLI reviewer and existing `pitch.html` page are not changed by this UI.

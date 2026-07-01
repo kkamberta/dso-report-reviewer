@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOC Alert Reviewer - Alert Fatigue Gap</title>
+<style>
+  :root {
+    --ink: #17202c;
+    --muted: #5f6f83;
+    --bg: #f5f7fb;
+    --paper: #ffffff;
+    --line: #d8e0ea;
+    --line-strong: #b8c5d5;
+    --blue: #2458d3;
+    --teal: #087f8c;
+    --green: #177245;
+    --amber: #a65f00;
+    --red: #b42318;
+    --plum: #6741a3;
+    --navy: #111827;
+    --shadow: 0 18px 45px rgba(17, 24, 39, 0.11);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+
+  /* Each .slide is sized/composed to be screenshotted as one PPT slide. */
+  .slide {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
+  .slide-head { margin-bottom: 20px; max-width: 860px; }
+  .slide-kicker { color: var(--blue); font-size: 0.78rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.06em; }
+  h2 { font-size: clamp(1.6rem, 3vw, 2.35rem); line-height: 1.1; margin: 8px 0 10px; letter-spacing: 0; }
+  .slide-head p { color: var(--muted); margin: 0; font-size: 1rem; }
+
+  .diagram-wrap {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .diagram-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 16px;
+    background: #111827;
+    color: #f9fafb;
+    font-size: 0.86rem;
+    font-weight: 850;
+  }
+  .diagram-title span:last-child { color: #fca5a1; font-size: 0.78rem; }
+  .diagram-wrap svg { display: block; width: 100%; height: auto; min-height: 460px; }
+
+  .matrix {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(17,24,39,0.05);
+  }
+  .matrix-row {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    border-bottom: 1px solid var(--line);
+  }
+  .matrix-row:last-child { border-bottom: 0; }
+  .matrix-cell { padding: 16px; font-size: 0.92rem; }
+  .matrix-cell.pain { color: var(--red); font-weight: 700; }
+  .matrix-cell.fix { color: var(--muted); }
+  .matrix-head { background: #f1f5f9; color: var(--muted); font-size: 0.73rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.05em; }
+  .matrix-head .matrix-cell { color: var(--muted); }
+  .matrix-row.three { grid-template-columns: 1fr 1.3fr 1.3fr; }
+  .matrix-cell.today { color: var(--blue); }
+  .matrix-cell.goal { color: var(--muted); }
+
+  .position-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+  .pos-pill { border: 1px solid var(--line-strong); background: var(--paper); border-radius: 999px; padding: 8px 16px; font-size: 0.86rem; font-weight: 750; color: var(--ink); }
+  .pos-pill.agent { border-color: var(--blue); color: var(--blue); background: #eff6ff; font-weight: 850; }
+  .pos-arrow { color: var(--muted); font-weight: 800; font-size: 1.1rem; }
+
+  @media (max-width: 1020px) {
+    .diagram-wrap { overflow-x: auto; }
+    .diagram-wrap svg { min-width: 900px; }
+  }
+  @media (max-width: 720px) {
+    .slide { padding: 32px 18px; }
+    .matrix-row, .matrix-row.three { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <section class="slide" id="gap">
+    <div class="slide-head">
+      <div class="slide-kicker">1. The problem picture</div>
+      <h2>Alerts interrupt the business before the story is clear.</h2>
+      <p>SIEM, EDR, network, and cloud already generate alerts. The business pain is escalation quality: owners are interrupted before the team knows whether the event is real, important, and actionable.</p>
+    </div>
+    <div class="diagram-wrap" aria-label="Alert fatigue silo diagram">
+      <div class="diagram-title">
+        <span>Native SOC alerting today</span>
+        <span>four consoles, one overwhelmed analyst</span>
+      </div>
+      <svg viewBox="0 0 1180 480" role="img" aria-labelledby="socGapTitle socGapDesc" xmlns="http://www.w3.org/2000/svg">
+        <title id="socGapTitle">Four native alerting tools land on one SOC analyst, who carries the pain</title>
+        <desc id="socGapDesc">SIEM, EDR, Network/IDS, and Cloud/CSPM alert sources are grouped as one block of native tools. A single arrow points from that block to a SOC analyst persona. Below the persona, three pains are listed: alerts have no context, there is no prioritization, and each tool is its own silo.</desc>
+        <defs>
+          <marker id="socGapArrow" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,10 L11,5 z" fill="#2458d3"/>
+          </marker>
+          <style>
+            .g-bg { fill: #ffffff; }
+            .g-zone-dashed { fill: #f8fafc; stroke: #7c8ea8; stroke-width: 2; stroke-dasharray: 7 6; }
+            .g-box { fill: #eff6ff; stroke: #2458d3; stroke-width: 2; }
+            .g-title { fill: #17202c; font: 800 16px Inter, system-ui, sans-serif; }
+            .g-small { fill: #5f6f83; font: 600 12px Inter, system-ui, sans-serif; }
+            .g-kicker { fill: #2458d3; font: 850 11px Inter, system-ui, sans-serif; letter-spacing: 1px; }
+            .g-line { stroke: #2458d3; stroke-width: 4; fill: none; marker-end: url(#socGapArrow); }
+            .g-redbox { fill: #fff1f0; stroke: #b42318; stroke-width: 2; }
+            .g-red-kicker { fill: #b42318; font: 850 11px Inter, system-ui, sans-serif; letter-spacing: 1px; }
+            .g-red-text { fill: #7a1810; font: 700 14px Inter, system-ui, sans-serif; }
+            .g-tri { fill: #b42318; }
+            .g-bang { fill: #ffffff; font: 900 11px Inter, system-ui, sans-serif; }
+            .g-person { fill: #111827; }
+            .g-person-label { fill: #17202c; font: 800 14px Inter, system-ui, sans-serif; }
+            .g-person-sub { fill: #5f6f83; font: 600 11px Inter, system-ui, sans-serif; }
+          </style>
+        </defs>
+        <rect class="g-bg" width="1180" height="480"/>
+
+        <!-- Grouped block: all four native alert sources, treated as peers not a pipeline -->
+        <rect class="g-zone-dashed" x="28" y="34" width="640" height="240" rx="12"/>
+        <text class="g-kicker" x="48" y="60">NATIVE SOC ALERTING TOOLS</text>
+
+        <rect class="g-box" x="48" y="76" width="280" height="86" rx="8"/>
+        <text class="g-title" x="64" y="106">SIEM</text>
+        <text class="g-small" x="64" y="128">Log correlation, rule-based alerts</text>
+        <text class="g-small" x="64" y="144">e.g. SIEM Tools</text>
+
+        <rect class="g-box" x="348" y="76" width="280" height="86" rx="8"/>
+        <text class="g-title" x="364" y="106">EDR</text>
+        <text class="g-small" x="364" y="128">Endpoint process / behavior alerts</text>
+        <text class="g-small" x="364" y="144">e.g. EDR Tools</text>
+
+        <rect class="g-box" x="48" y="174" width="280" height="86" rx="8"/>
+        <text class="g-title" x="64" y="204">NETWORK / IDS</text>
+        <text class="g-small" x="64" y="226">Traffic and intrusion signatures</text>
+        <text class="g-small" x="64" y="242">e.g. Network IDS Tools</text>
+
+        <rect class="g-box" x="348" y="174" width="280" height="86" rx="8"/>
+        <text class="g-title" x="364" y="204">CLOUD / CSPM</text>
+        <text class="g-small" x="364" y="226">Misconfig and cloud identity alerts</text>
+        <text class="g-small" x="364" y="242">e.g. CSPM Tools</text>
+
+        <!-- Single arrow from the grouped block to the human who absorbs all four alert streams -->
+        <path class="g-line" d="M672 154 H772"/>
+
+        <!-- SOC analyst persona -->
+        <circle class="g-person" cx="880" cy="118" r="34"/>
+        <path class="g-person" d="M810 232 C810 178, 950 178, 950 232 Z"/>
+        <polygon class="g-tri" points="908,78 892,106 924,106"/>
+        <text class="g-bang" x="908" y="102" text-anchor="middle">!</text>
+        <text class="g-person-label" x="880" y="256" text-anchor="middle">SOC analyst</text>
+        <text class="g-person-sub" x="880" y="274" text-anchor="middle">receives all four alert streams</text>
+
+        <!-- Combined pain list -->
+        <rect class="g-redbox" x="28" y="308" width="1124" height="142" rx="8"/>
+        <text class="g-red-kicker" x="48" y="334">THE GAP</text>
+
+        <polygon class="g-tri" points="48,344 34,368 62,368"/>
+        <text class="g-bang" x="48" y="364" text-anchor="middle">!</text>
+        <text class="g-red-text" x="76" y="362">Raw alerts lack the story — asset, identity, timeline, and likely impact.</text>
+
+        <polygon class="g-tri" points="48,378 34,402 62,402"/>
+        <text class="g-bang" x="48" y="398" text-anchor="middle">!</text>
+        <text class="g-red-text" x="76" y="396">Every alert asks for urgency, even when most do not deserve escalation.</text>
+
+        <polygon class="g-tri" points="48,412 34,436 62,436"/>
+        <text class="g-bang" x="48" y="432" text-anchor="middle">!</text>
+        <text class="g-red-text" x="76" y="430">Analysts stitch the incident story manually across consoles and queues.</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="slide" id="fix">
+    <div class="slide-head">
+      <div class="slide-kicker">2. The fix</div>
+      <h2>Each pain gets a process, not just a promise.</h2>
+      <p>No new alerting tools. A review step sits after the four native sources and closes each gap above.</p>
+    </div>
+    <div class="matrix">
+      <div class="matrix-row matrix-head">
+        <div class="matrix-cell">Pain</div>
+        <div class="matrix-cell">Process that closes it</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">The analyst sees a signal, not a complete incident story</div>
+        <div class="matrix-cell fix">An enrichment step attaches asset criticality, identity context, and threat intel to every alert before a human looks at it.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">Context-switching across alert streams slows confirmation</div>
+        <div class="matrix-cell fix">A single intake step correlates alerts from SIEM, EDR, network, and cloud into one incident view instead of four separate consoles.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">Low-value alerts compete with real incidents</div>
+        <div class="matrix-cell fix">A scoring step ranks alerts by combined signal strength and asset importance, producing a triage priority distinct from the raw alert severity.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell pain">Escalation happens before the next action is clear</div>
+        <div class="matrix-cell fix">Every escalated alert is checked for complete context, a triage priority, and a recommended next action before it reaches the analyst.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="agent">
+    <div class="slide-head">
+      <div class="slide-kicker">3. Who closes the gap</div>
+      <h2>Blue Agent sits after the four alert sources and works each gap closed.</h2>
+      <p>Blue Agent enriches, prioritizes, and validates every alert before a human signs off — applying the same triage-and-validate pattern already proven for scan findings in the customer product, now extended to alerts.</p>
+    </div>
+    <div class="position-strip" aria-label="Where Blue Agent sits in the flow">
+      <span class="pos-pill">SIEM / EDR / Network-IDS / Cloud-CSPM alerts</span>
+      <span class="pos-arrow">&rarr;</span>
+      <span class="pos-pill agent">Blue Agent</span>
+      <span class="pos-arrow">&rarr;</span>
+      <span class="pos-pill">SOC analyst sign-off</span>
+    </div>
+    <div class="matrix">
+      <div class="matrix-row matrix-head three">
+        <div class="matrix-cell">Pain</div>
+        <div class="matrix-cell">Blue Agent today</div>
+        <div class="matrix-cell">Goal: full elimination</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">Alert has no context, hard to know if it's real</div>
+        <div class="matrix-cell today">Blue Agent attaches asset criticality, identity context, and threat intel to every alert before a human looks at it — the same enrichment-and-validate pattern already proven for scan findings in the customer product.</div>
+        <div class="matrix-cell goal">Full correlation with live threat-intel feeds and identity graph data, not just static asset and priority mappings.</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">Four alert streams, no time to check each one</div>
+        <div class="matrix-cell today">Blue Agent ingests SIEM, EDR, network, and cloud alerts into one correlated incident view instead of four separate consoles — the same single-intake pattern already used across five scanner sheet types in the customer product.</div>
+        <div class="matrix-cell goal">Real-time streaming correlation across all four sources, not batch or periodic pulls.</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">No prioritization — every alert reads equally urgent</div>
+        <div class="matrix-cell today">Blue Agent scores each alert against asset priority and incident severity, producing a triage rank distinct from the raw alert severity — mirroring the residual-severity scoring already validated for scan findings.</div>
+        <div class="matrix-cell goal">Factor in live exposure and blast-radius context, not just a static asset priority mapping.</div>
+      </div>
+      <div class="matrix-row three">
+        <div class="matrix-cell pain">Alert is not investigation-ready</div>
+        <div class="matrix-cell today">Blue Agent validates that every escalated alert has complete context, a triage priority, and a recommended next action before it reaches the analyst — the same structural validation gate proven in the customer product's row-coverage check.</div>
+        <div class="matrix-cell goal">Push the validated, prioritized case straight into the SOC's existing case-management workflow once escalation rules are proven.</div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
