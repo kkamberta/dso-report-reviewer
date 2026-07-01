@@ -1,4 +1,5 @@
 from pathlib import Path
+import tomllib
 
 
 ROOT = Path(__file__).parent.parent
@@ -6,6 +7,28 @@ UI = ROOT / "ui" / "index.html"
 DOC = ROOT / "docs" / "OPERATOR-UI.md"
 RUNBOOK = ROOT / "docs" / "MVP-DEMO-RUNBOOK.html"
 CUSTOMER_PITCH = ROOT / "customer-pitch.html"
+PYPROJECT = ROOT / "pyproject.toml"
+START_DEMO = ROOT / "scripts" / "start-demo.sh"
+SMOKE_DEMO = ROOT / "scripts" / "smoke-demo.py"
+
+
+def test_project_metadata_supports_plain_uv_test_command():
+    metadata = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
+
+    dependencies = "\n".join(metadata["project"]["dependencies"])
+    dev_dependencies = "\n".join(metadata["dependency-groups"]["dev"])
+    assert "anthropic" in dependencies
+    assert "openpyxl" in dependencies
+    assert "pytest" in dev_dependencies
+
+    script = START_DEMO.read_text(encoding="utf-8")
+    assert "uv run python demo_agent.py" in script
+    assert "--with openpyxl" not in script
+
+    smoke = SMOKE_DEMO.read_text(encoding="utf-8")
+    assert "run_smoke" in smoke
+    assert "/jobs/build-92619/reviews" in smoke
+    assert "Technical Commands" in smoke
 
 
 def test_operator_ui_exists_and_is_static_html():
@@ -56,6 +79,8 @@ def test_operator_ui_documents_how_to_open_and_rollback():
     assert "Open `customer-pitch.html` directly in a browser" in doc
     assert "docs/MVP-DEMO-RUNBOOK.html" in doc
     assert "No dev server is required" in doc
+    assert "uv run pytest" in doc
+    assert "uv run python scripts/smoke-demo.py" in doc
     assert "Rollback" in doc
 
 
@@ -65,6 +90,8 @@ def test_mvp_demo_runbook_covers_live_demo_flow():
     required_text = [
         "DSO Report Reviewer MVP Demo Runbook",
         "Preconditions",
+        "uv run pytest",
+        "uv run python scripts/smoke-demo.py",
         "Run demo job",
         "Reset demo",
         "build-92619",

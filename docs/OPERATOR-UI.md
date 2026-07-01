@@ -20,6 +20,7 @@ The UI shows the workflow expected from the container/webhook version:
 - A modern browser.
 - No backend is required for the current static mock.
 - Future backend integration should expose the planned job endpoints from the webhook service.
+- Project dependencies are declared in `pyproject.toml`; `uv run pytest` is the expected test command.
 
 ## How To Open
 
@@ -66,6 +67,8 @@ No dev server is required for the current version.
 
 ## Verification
 
+- `uv run pytest` passes from a clean checkout.
+- `uv run python scripts/smoke-demo.py` passes before declaring the MVP demo milestone ready.
 - The dashboard loads with sample `build-92619` data.
 - The New review form can create a queued mock job.
 - Filters update the findings table without page reload.
@@ -77,7 +80,7 @@ No dev server is required for the current version.
 - The operator UI can reset `build-92619` to a clean pre-approval state through `POST /demo/reset`.
 - Approve/Override actions persist through `POST /jobs/{job_id}/reviews` and rewrite the downloadable XLSX/markdown outputs. Do not rely on browser-only review status for customer demos.
 - Patch/upgrade remediation rows carry `remediation_commands` from the demo agent, render those commands in the Remediation / control column, and persist them to the `Technical Commands` XLSX column plus the markdown summary.
-- Existing reviewer tests still pass with `pytest`.
+- Existing reviewer tests still pass with `uv run pytest`.
 
 ## Documentation Discipline
 

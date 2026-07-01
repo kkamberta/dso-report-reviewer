@@ -1,0 +1,16 @@
+[project]
+name = "dso-report-reviewer"
+version = "0.1.0"
+description = "Local DSO report reviewer and MVP demo harness."
+requires-python = ">=3.11"
+dependencies = [
+  "anthropic>=0.40.0",
+  "openpyxl>=3.1.0",
+  "pyyaml>=6.0.0",
+  "python-dotenv>=1.0.0",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0.0",
+]

@@ -262,7 +262,8 @@
         <h2>Preconditions</h2>
         <div class="checklist">
           <label><input type="checkbox"> Repo checkout is available on the demo machine.</label>
-          <label><input type="checkbox"> Python dependencies can run through <code>uv</code>.</label>
+          <label><input type="checkbox"> Python dependencies can run through <code>uv</code>; <code>uv run pytest</code> passes.</label>
+          <label><input type="checkbox"> MVP smoke passes with <code>uv run python scripts/smoke-demo.py</code>.</label>
           <label><input type="checkbox"> Browser can open <code>http://127.0.0.1:8088</code>.</label>
           <label><input type="checkbox"> Port <code>8088</code> is free.</label>
           <label><input type="checkbox"> Branch contains <code>demo_agent.py</code>, <code>scripts/start-demo.sh</code>, <code>ui/index.html</code>, <code>customer-pitch.html</code>, and <code>docs/OPERATOR-UI.md</code>.</label>
@@ -301,11 +302,11 @@
           <pre>./scripts/start-demo.sh</pre>
           <button class="copy" type="button" data-copy="./scripts/start-demo.sh">Copy</button>
         </div>
-        <p>Keep this process running during the demo. It prints the customer pitch, operator UI, and runbook URLs after the health check passes. The script uses a repo-local <code>.uv-cache/</code> by default so it can run in restricted environments.</p>
+        <p>Keep this process running during the demo. It prints the customer pitch, operator UI, and runbook URLs after the health check passes. Dependencies resolve from <code>pyproject.toml</code>, and the script uses a repo-local <code>.uv-cache/</code> by default so it can run in restricted environments.</p>
         <h3>Manual Start Fallback</h3>
         <div class="copy-row">
-          <pre>uv run --with openpyxl python demo_agent.py --host 127.0.0.1 --port 8088</pre>
-          <button class="copy" type="button" data-copy="uv run --with openpyxl python demo_agent.py --host 127.0.0.1 --port 8088">Copy</button>
+          <pre>uv run python demo_agent.py --host 127.0.0.1 --port 8088</pre>
+          <button class="copy" type="button" data-copy="uv run python demo_agent.py --host 127.0.0.1 --port 8088">Copy</button>
         </div>
         <h3>Health Check</h3>
         <div class="copy-row">
@@ -313,6 +314,12 @@
           <button class="copy" type="button" data-copy="curl -s http://127.0.0.1:8088/healthz">Copy</button>
         </div>
         <p>Expected response: <code>{"status":"ok"}</code></p>
+        <h3>Automated MVP Smoke</h3>
+        <div class="copy-row">
+          <pre>uv run python scripts/smoke-demo.py</pre>
+          <button class="copy" type="button" data-copy="uv run python scripts/smoke-demo.py">Copy</button>
+        </div>
+        <p>This starts an isolated local demo agent on a temporary port, verifies UI/runbook delivery, resets the demo, approves row <code>18</code>, and checks downloaded markdown/XLSX output.</p>
       </section>
 
       <section id="flow">
@@ -361,6 +368,8 @@
         <div class="checklist">
           <label><input type="checkbox"> Customer pitch page opens.</label>
           <label><input type="checkbox"> Operator UI opens.</label>
+          <label><input type="checkbox"> <code>uv run pytest</code> passes without extra dependency flags.</label>
+          <label><input type="checkbox"> <code>uv run python scripts/smoke-demo.py</code> passes.</label>
           <label><input type="checkbox"> Demo agent health check passes.</label>
           <label><input type="checkbox"> <code>Reset demo</code> restores row <code>18</code> to pending before the customer flow.</label>
           <label><input type="checkbox"> <code>Run demo job</code> creates or refreshes <code>build-92619</code>.</label>

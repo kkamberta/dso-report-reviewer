@@ -10,7 +10,7 @@ cd "${ROOT_DIR}"
 export UV_CACHE_DIR="${UV_CACHE_DIR:-${ROOT_DIR}/.uv-cache}"
 
 echo "Starting DSO Report Reviewer demo agent on ${BASE_URL}"
-uv run --with openpyxl python demo_agent.py --host "${HOST}" --port "${PORT}" &
+uv run python demo_agent.py --host "${HOST}" --port "${PORT}" &
 SERVER_PID="$!"
 
 cleanup() {
