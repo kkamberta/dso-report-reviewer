@@ -99,10 +99,12 @@ One object per finding, in this exact schema:
 ## Compensation control writing rules
 
 1. If a fix version exists: "Upgrade <component> to <version> to remediate <issue>."
-2. If risk is accepted: "Accepted: <brief rationale>. Schedule review when fix is available."
-3. If compensated by a control: "Compensated by <WAF rule / network policy / rotation>. Residual risk reduced to <severity>."
-4. If false positive: "False positive: <brief reason e.g. test code, framework asset, unused package>."
-5. Always be specific. Never write generic phrases like 'apply security patches' or 'follow best practices'.
+2. If remediation says patch or upgrade to a fixed version, include one executable technical command in the same sentence when the package ecosystem is clear, for example `mvn versions:use-dep-version ...`, `npm install <package>@<version>`, `python -m pip install --upgrade '<package>==<version>'`, `apk upgrade --no-cache <package>`, or `dnf update -y <package>`.
+3. If the exact package manager is not clear, state the exact dependency/version and say to update the lock file through the project's native package manager; do not invent a repository, image tag, or endpoint.
+4. If risk is accepted: "Accepted: <brief rationale>. Schedule review when fix is available."
+5. If compensated by a control: "Compensated by <WAF rule / network policy / rotation>. Residual risk reduced to <severity>."
+6. If false positive: "False positive: <brief reason e.g. test code, framework asset, unused package>."
+7. Always be specific. Never write generic phrases like 'apply security patches' or 'follow best practices'.
 """
 
 

@@ -289,6 +289,7 @@
               <tr><td>Validation failed rows</td><td><code>1</code></td></tr>
               <tr><td>Severity review rows</td><td><code>1</code> before approval</td></tr>
               <tr><td>Pending review rows</td><td><code>2</code> before approval, <code>1</code> after approving row <code>18</code></td></tr>
+              <tr><td>Patch command rows</td><td>Row <code>42</code> shows Maven/Gradle command boxes; row <code>77</code> shows an Alpine package command.</td></tr>
             </tbody>
           </table>
         </div>
@@ -320,7 +321,7 @@
           <div class="step"><span class="num">1</span><strong>Open pitch</strong><span>Use <code>/customer-pitch.html</code>. Explain this is not another scanner; it reviews scanner output.</span></div>
           <div class="step"><span class="num">2</span><strong>Open UI</strong><span>Use <code>/ui/index.html</code>. Confirm demo agent online status.</span></div>
           <div class="step"><span class="num">3</span><strong>Reset demo</strong><span>Click <code>Reset demo</code>. This restores <code>build-92619</code> to the clean pre-approval state.</span></div>
-          <div class="step"><span class="num">4</span><strong>Run demo job</strong><span>Click <code>Run demo job</code>. Confirm <code>build-92619</code> completes with 4 findings.</span></div>
+          <div class="step"><span class="num">4</span><strong>Run demo job</strong><span>Click <code>Run demo job</code>. Confirm <code>build-92619</code> completes with 4 findings and row <code>42</code> has technical command boxes.</span></div>
           <div class="step"><span class="num">5</span><strong>Before approval</strong><span>Open <code>/outputs/summary.md</code>. Rows 18 and 33 should be in Human Review Queue.</span></div>
           <div class="step"><span class="num">6</span><strong>Approve row 18</strong><span>Approve <code>Production secret in application-prod.yml</code>. UI reloads from demo agent.</span></div>
           <div class="step"><span class="num">7</span><strong>After approval</strong><span>Summary shows row 18 under Approved Review Decisions and row 33 still pending.</span></div>
@@ -364,7 +365,9 @@
           <label><input type="checkbox"> <code>Reset demo</code> restores row <code>18</code> to pending before the customer flow.</label>
           <label><input type="checkbox"> <code>Run demo job</code> creates or refreshes <code>build-92619</code>.</label>
           <label><input type="checkbox"> Findings table loads from the agent.</label>
+          <label><input type="checkbox"> Patch/upgrade remediations show a technical command box.</label>
           <label><input type="checkbox"> Summary and XLSX downloads are available.</label>
+          <label><input type="checkbox"> Markdown summary includes a fenced technical command and XLSX includes the <code>Technical Commands</code> column.</label>
           <label><input type="checkbox"> Approving row <code>18</code> persists to downloaded summary and XLSX.</label>
           <label><input type="checkbox"> Row <code>33</code> remains pending to prove validation failures still require human review.</label>
         </div>

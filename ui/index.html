@@ -223,6 +223,33 @@
   .finding-name { font-weight: 800; max-width: 230px; }
   .muted { color: var(--muted); }
   .control { max-width: 360px; min-width: 300px; }
+  .command-box {
+    margin-top: 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #e2e8f0;
+    overflow: hidden;
+  }
+  .command-label {
+    display: block;
+    padding: 7px 9px;
+    background: #1e293b;
+    color: #bfdbfe;
+    font-size: 0.72rem;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .command-box code {
+    display: block;
+    padding: 9px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
   .actions { min-width: 230px; }
   .empty {
     padding: 26px;
@@ -460,6 +487,16 @@ const initialJobs = [
         residualSeverity: "Critical",
         assetImportance: "High",
         control: "Upgrade tomcat-embed-core to 10.1.56. Keep external Tomcat endpoints restricted by network ACL until the upgrade is deployed.",
+        remediationCommands: [
+          {
+            label: "Maven dependency pin",
+            command: "mvn versions:use-dep-version -Dincludes=org.apache.tomcat.embed:tomcat-embed-core -DdepVersion=10.1.56 -DforceVersion=true"
+          },
+          {
+            label: "Gradle dependency pin",
+            command: "./gradlew dependencies --write-locks"
+          }
+        ],
         flag: "None",
         reviewStatus: "approved",
         reviewerNote: "Matches upgrade path from scanner output."
@@ -499,6 +536,12 @@ const initialJobs = [
         residualSeverity: "Critical",
         assetImportance: "High",
         control: "Rebuild the container image using a base image that includes libssl3 and libcrypto3 3.3.6-r0 or newer.",
+        remediationCommands: [
+          {
+            label: "Alpine package refresh",
+            command: "apk upgrade --no-cache libssl3 libcrypto3"
+          }
+        ],
         flag: "Severity changed",
         reviewStatus: "pending",
         reviewerNote: ""
@@ -512,6 +555,12 @@ const initialJobs = [
         residualSeverity: "Medium",
         assetImportance: "Low",
         control: "Upgrade requests to 2.32.4. Python projects can apply `python -m pip install --upgrade 'requests==2.32.4'` and update the lock file.",
+        remediationCommands: [
+          {
+            label: "Python dependency pin",
+            command: "python -m pip install --upgrade 'requests==2.32.4'"
+          }
+        ],
         flag: "None",
         reviewStatus: "approved",
         reviewerNote: "Concrete remediation command is present."
@@ -617,6 +666,7 @@ function normalizeFinding(apiFinding) {
     residualSeverity: apiFinding.residual_severity || "Info",
     assetImportance: apiFinding.asset_importance || "Low",
     control: apiFinding.compensation_control || "",
+    remediationCommands: apiFinding.remediation_commands || [],
     flag: apiFinding.flag || "None",
     reviewStatus: apiFinding.review_status || "pending",
     reviewerNote: apiFinding.reviewer_note || ""
@@ -680,6 +730,28 @@ function validationFailedCount(job) {
 
 function severityChanged(finding) {
   return finding.originalSeverity !== finding.residualSeverity;
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function renderCommandBoxes(finding) {
+  const commands = Array.isArray(finding.remediationCommands) ? finding.remediationCommands : [];
+  if (!commands.length) return "";
+  return commands
+    .filter((item) => item && item.command)
+    .map((item) => `
+      <div class="command-box">
+        <span class="command-label">${escapeHtml(item.label || "Technical command")}</span>
+        <code>${escapeHtml(item.command)}</code>
+      </div>
+    `).join("");
 }
 
 function renderMetrics() {
@@ -778,7 +850,7 @@ function renderFindings() {
       <td><span class="badge ${severityClass(finding.originalSeverity)}">${finding.originalSeverity}</span></td>
       <td><span class="badge ${severityClass(finding.residualSeverity)}">${finding.residualSeverity}</span></td>
       <td>${finding.assetImportance}</td>
-      <td class="control">${finding.control}</td>
+      <td class="control">${escapeHtml(finding.control)}${renderCommandBoxes(finding)}</td>
       <td><span class="badge ${finding.flag === "None" ? "info" : "review"}">${finding.flag}</span></td>
       <td class="actions">
         <div class="btn-row">

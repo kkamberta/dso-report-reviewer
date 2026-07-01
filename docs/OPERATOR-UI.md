@@ -13,6 +13,7 @@ The UI shows the workflow expected from the container/webhook version:
 3. Inspect summary output and export paths.
 4. Filter findings by scanner, severity, validation status, and review status.
 5. Record mock approve/override decisions for human-gated rows.
+6. Show a technical command box when patch/upgrade remediation includes an executable package-manager action.
 
 ## Preconditions
 
@@ -75,6 +76,7 @@ No dev server is required for the current version.
 - The operator UI can call the demo agent, run the one-click `build-92619` demo job, refresh job status, load findings, and open output downloads.
 - The operator UI can reset `build-92619` to a clean pre-approval state through `POST /demo/reset`.
 - Approve/Override actions persist through `POST /jobs/{job_id}/reviews` and rewrite the downloadable XLSX/markdown outputs. Do not rely on browser-only review status for customer demos.
+- Patch/upgrade remediation rows carry `remediation_commands` from the demo agent, render those commands in the Remediation / control column, and persist them to the `Technical Commands` XLSX column plus the markdown summary.
 - Existing reviewer tests still pass with `pytest`.
 
 ## Documentation Discipline

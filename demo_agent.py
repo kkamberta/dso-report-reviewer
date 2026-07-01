@@ -98,6 +98,16 @@ def demo_findings(project: str, priority: str) -> list[dict[str, Any]]:
             "residual_severity": "Critical",
             "asset_importance": asset,
             "compensation_control": "Upgrade tomcat-embed-core to 10.1.56. Keep external Tomcat endpoints restricted by network ACL until the upgrade is deployed.",
+            "remediation_commands": [
+                {
+                    "label": "Maven dependency pin",
+                    "command": "mvn versions:use-dep-version -Dincludes=org.apache.tomcat.embed:tomcat-embed-core -DdepVersion=10.1.56 -DforceVersion=true",
+                },
+                {
+                    "label": "Gradle dependency pin",
+                    "command": "./gradlew dependencies --write-locks",
+                },
+            ],
             "flag": "None",
             "review_status": "approved",
             "reviewer_note": "Demo baseline: no additional approval required.",
@@ -111,6 +121,12 @@ def demo_findings(project: str, priority: str) -> list[dict[str, Any]]:
             "residual_severity": "High",
             "asset_importance": asset,
             "compensation_control": "Rebuild the container image from a patched base image that includes fixed libssl and libcrypto packages.",
+            "remediation_commands": [
+                {
+                    "label": "Alpine package refresh",
+                    "command": "apk upgrade --no-cache libssl3 libcrypto3",
+                },
+            ],
             "flag": "None",
             "review_status": "approved",
             "reviewer_note": "Demo baseline: container rebuild path is accepted.",
@@ -124,6 +140,7 @@ def demo_findings(project: str, priority: str) -> list[dict[str, Any]]:
             "residual_severity": "Critical",
             "asset_importance": asset,
             "compensation_control": "Confirm whether values are live credentials. If confirmed, rotate within 24 hours and replace file-based secrets with runtime secret manager injection.",
+            "remediation_commands": [],
             "flag": "Severity changed",
             "review_status": "pending",
             "reviewer_note": "",
@@ -137,6 +154,7 @@ def demo_findings(project: str, priority: str) -> list[dict[str, Any]]:
             "residual_severity": "Info",
             "asset_importance": asset,
             "compensation_control": "VALIDATION_FAILED",
+            "remediation_commands": [],
             "flag": "Validation failed",
             "review_status": "pending",
             "reviewer_note": "",
@@ -191,6 +209,7 @@ def write_annotated_xlsx(path: Path, findings: list[dict[str, Any]]) -> None:
         "Residual Severity",
         "Asset Importance",
         "Compensation Control",
+        "Technical Commands",
         "Flag",
         "Review Status",
         "Reviewer Note",
@@ -206,6 +225,7 @@ def write_annotated_xlsx(path: Path, findings: list[dict[str, Any]]) -> None:
             finding["residual_severity"],
             finding["asset_importance"],
             finding["compensation_control"],
+            format_remediation_commands(finding),
             finding["flag"],
             finding["review_status"],
             finding.get("reviewer_note", ""),
@@ -223,7 +243,11 @@ def write_summary(path: Path, job_id: str, project: str, priority: str, findings
         f"Job `{job_id}` reviewed `{project}` as `{priority}` priority. "
         f"{len(findings)} demo findings were processed with {len(review_rows)} rows requiring human review.\n\n"
         f"## Critical and High Findings\n"
-        + "\n".join(f"- {f['residual_severity']}: {f['finding']} - {f['compensation_control']}" for f in critical_high)
+        + "\n".join(
+            f"- {f['residual_severity']}: {f['finding']} - {f['compensation_control']}"
+            f"{format_summary_commands(f)}"
+            for f in critical_high
+        )
         + "\n\n## Human Review Queue\n"
         + ("\n".join(f"- Row {f['row_id']}: {f['flag']} - {f['finding']}" for f in review_rows) or "- No pending review rows.")
         + "\n\n## Approved Review Decisions\n"
@@ -234,6 +258,22 @@ def write_summary(path: Path, job_id: str, project: str, priority: str, findings
         + "\n"
     )
     path.write_text(text, encoding="utf-8")
+
+
+def format_remediation_commands(finding: dict[str, Any]) -> str:
+    commands = finding.get("remediation_commands") or []
+    return "\n".join(
+        f"{item.get('label', 'Command')}: {item.get('command', '')}"
+        for item in commands
+        if item.get("command")
+    )
+
+
+def format_summary_commands(finding: dict[str, Any]) -> str:
+    commands = format_remediation_commands(finding)
+    if not commands:
+        return ""
+    return f"\n\n  Technical command:\n\n  ```bash\n  {commands.replace(chr(10), chr(10) + '  ')}\n  ```"
 
 
 def apply_review_decision(job: DemoJob, payload: dict[str, Any]) -> dict[str, Any] | str:

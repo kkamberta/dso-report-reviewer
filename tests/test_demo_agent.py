@@ -15,6 +15,9 @@ def test_demo_findings_include_human_gate_cases():
     assert any(f["flag"] == "Severity changed" and f["review_status"] == "pending" for f in findings)
     assert any(f["flag"] == "Validation failed" for f in findings)
     assert all(f["asset_importance"] == "High" for f in findings)
+    row_42 = next(f for f in findings if f["row_id"] == 42)
+    assert row_42["remediation_commands"][0]["label"] == "Maven dependency pin"
+    assert "tomcat-embed-core" in row_42["remediation_commands"][0]["command"]
 
 
 def test_create_demo_job_writes_outputs(tmp_path: Path):
@@ -39,12 +42,17 @@ def test_create_demo_job_writes_outputs(tmp_path: Path):
     summary = Path(job.output_md).read_text(encoding="utf-8")
     assert "DSO Report Reviewer Demo Summary" in summary
     assert "Human Review Queue" in summary
+    assert "Technical command" in summary
+    assert "mvn versions:use-dep-version" in summary
 
     wb = openpyxl.load_workbook(job.output_xlsx)
     ws = wb["Reviewed Findings"]
     assert ws.max_row == 5
     assert ws.cell(row=1, column=1).value == "Scanner"
-    assert ws.cell(row=1, column=11).value == "Reviewer Note"
+    assert ws.cell(row=1, column=9).value == "Technical Commands"
+    assert ws.cell(row=1, column=12).value == "Reviewer Note"
+    row_42 = next(row for row in ws.iter_rows(values_only=True) if row[1] == 42)
+    assert "Maven dependency pin" in row_42[8]
 
 
 def test_apply_review_decision_rewrites_download_outputs(tmp_path: Path):
@@ -80,8 +88,8 @@ def test_apply_review_decision_rewrites_download_outputs(tmp_path: Path):
     wb = openpyxl.load_workbook(job.output_xlsx)
     ws = wb["Reviewed Findings"]
     row_18 = next(row for row in ws.iter_rows(values_only=True) if row[1] == 18)
-    assert row_18[9] == "approved"
-    assert row_18[10] == "Approved after confirming credential rotation plan."
+    assert row_18[10] == "approved"
+    assert row_18[11] == "Approved after confirming credential rotation plan."
 
 
 def test_reset_demo_restores_clean_pre_approval_outputs(tmp_path: Path):
@@ -111,5 +119,5 @@ def test_reset_demo_restores_clean_pre_approval_outputs(tmp_path: Path):
     wb = openpyxl.load_workbook(reset_job.output_xlsx)
     ws = wb["Reviewed Findings"]
     xlsx_row_18 = next(row for row in ws.iter_rows(values_only=True) if row[1] == 18)
-    assert xlsx_row_18[9] == "pending"
-    assert xlsx_row_18[10] is None
+    assert xlsx_row_18[10] == "pending"
+    assert xlsx_row_18[11] is None
